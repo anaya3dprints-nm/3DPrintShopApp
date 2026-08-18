@@ -1,0 +1,71 @@
+@model IEnumerable<ThreeDPrintStore.Controllers.BasketViewModel>
+
+@{
+    ViewData["Title"] = "Your Shopping Basket";
+    decimal basketTotal = Model.Sum(item => item.TotalLinePrice);
+}
+
+<div class="container my-5" style="max-width: 800px;">
+    <h2 class="fw-bold text-dark mb-4">Your Shopping Basket</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="card p-5 text-center border-0 shadow-sm rounded-3">
+            <h4 class="text-muted fw-bold mb-2">Your basket is currently empty</h4>
+            <p class="text-muted small mb-4">Head back to our catalog home page to explore items ready to ship.</p>
+            <div>
+                <a href="/" class="btn btn-primary px-4 fw-bold">Return to Catalog</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0 rounded-3 p-4 bg-white">
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr class="text-muted small text-uppercase">
+                            <th>Product</th>
+                            <th class="text-center">Quantity</th>
+                            <th class="text-end">Price</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">@item.Product.Name</div>
+                                    <span class="text-muted small text-truncate d-inline-block" style="max-width: 300px;">@item.Product.Description</span>
+                                </td>
+                                <td class="text-center fw-semibold">@item.Quantity</td>
+                                <td class="text-end text-muted">$@item.Product.Price.ToString("F2")</td>
+                                <td class="text-end fw-bold text-dark">$@item.TotalLinePrice.ToString("F2")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                <div>
+                    <a href="/" class="btn btn-outline-secondary btn-sm fw-semibold">← Keep Shopping</a>
+                </div>
+                <div class="text-end">
+                    <span class="text-muted small text-uppercase d-block mb-1">Subtotal</span>
+                    <h3 class="fw-bold text-success m-0">$@basketTotal.ToString("F2")</h3>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <!-- Links safely directly to your new operational checkout controller system matrix -->
+                <a href="/Checkout" class="btn btn-primary w-100 py-2 fw-bold text-uppercase shadow-sm">
+                    Proceed to Secure Checkout
+                </a>
+            </div>
+
+            
+        </div>
+    }
+</div>

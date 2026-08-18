@@ -1,0 +1,77 @@
+﻿@model IEnumerable<ThreeDPrintStore.Models.Product>
+
+@{
+    ViewData["Title"] = "3D Print Catalog Home";
+}
+
+<!-- Hero Welcome Section Banner -->
+<div class="bg-light py-5 mb-5 rounded-3 text-center border-bottom">
+    <div class="container">
+        <h1 class="display-5 fw-bold text-dark mb-2">Local 3D Print Studio</h1>
+        <p class="lead text-muted max-width-sm mx-auto" style="max-width: 600px;">
+            Browse our catalog of pre-fabricated models, or request a custom slicing calibration setup. 
+            <span class="fw-bold text-primary text-nowrap">Free delivery directly within Albuquerque!</span>
+        </p>
+        <div class="mt-3">
+            <a href="/Quote/RequestForm" class="btn btn-primary btn-md px-4 fw-bold">Request a Custom Quote</a>
+        </div>
+    </div>
+</div>
+
+<!-- Main Catalog Container -->
+<div class="container mb-5">
+    <h3 class="fw-bold text-dark mb-4">Available In-Stock Models</h3>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        @foreach (var product in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 rounded-3 overflow-hidden transition-card">
+                    <!-- Product Item Image Wrap -->
+                    <div class="bg-secondary position-relative" style="height: 220px;">
+                        <img src="@product.ImageUrl" class="w-100 h-100 object-fit-cover" alt="@product.Name" style="object-fit: cover;" />
+                        @if (product.StockQuantity <= 3 && product.StockQuantity > 0)
+                        {
+                            <span class="position-absolute top-0 end-0 bg-danger text-white text-xs fw-bold px-2 py-1 m-2 rounded small">
+                                Low Stock (@product.StockQuantity Left)
+                            </span>
+                        }
+                    </div>
+
+                    <!-- Product Details Body Card -->
+                    <div class="card-body d-flex flex-column p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title fw-bold text-dark m-0">@product.Name</h5>
+                            <span class="fs-5 fw-bold text-success">$@product.Price.ToString("F2")</span>
+                        </div>
+                        
+                        <p class="card-text text-muted small flex-grow-1">
+                            @product.Description
+                        </p>
+
+                        <!-- Stock Level Notification Status -->
+                        <div class="my-3 d-flex align-items-center justify-content-between border-top pt-2 text-muted small">
+                            <span>Availability:</span>
+                            @if (product.StockQuantity > 0)
+                            {
+                                <span class="text-success fw-semibold">In Stock (@product.StockQuantity available)</span>
+                            }
+                            else
+                            {
+                                <span class="text-danger fw-semibold">Out of Stock</span>
+                            }
+                        </div>
+
+                        <!-- Action Form: Adds item parameters safely to user's checkout session cookie -->
+                        <form action="/Basket/Add" method="post" class="mt-auto">
+                            <input type="hidden" name="productId" value="@product.Id" />
+                            <button type="submit" class="btn btn-outline-primary w-100 fw-semibold align-items-center justify-content-center" @(product.StockQuantity == 0 ? "disabled" : "")>
+                                Add to Basket
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

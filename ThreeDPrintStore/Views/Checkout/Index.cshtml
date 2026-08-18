@@ -1,0 +1,75 @@
+@model ThreeDPrintStore.Models.Order
+
+@{
+    ViewData["Title"] = "Secure Checkout";
+}
+
+<div class="container my-5">
+    <div class="row g-5">
+        <!-- Col 1: Delivery Address Form Parameters -->
+        <div class="col-md-7">
+            <div class="card shadow-sm border-0 p-4 rounded-3 bg-white">
+                <h4 class="fw-bold mb-3 text-dark">Fulfillment Delivery Address</h4>
+                <form asp-action="PlaceOrder" method="post">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Full Name</label>
+                        <input asp-for="CustomerName" class="form-control" required placeholder="Jane Doe" />
+                        <span asp-validation-for="CustomerName" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Email Address</label>
+                        <input type="email" asp-for="CustomerEmail" class="form-control" required placeholder="jane@example.com" />
+                        <span asp-validation-for="CustomerEmail" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Street Address</label>
+                        <input asp-for="StreetAddress" class="form-control" required placeholder="123 Central Ave NE" />
+                        <span asp-validation-for="StreetAddress" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">City</label>
+                            <input asp-for="City" class="form-control" required placeholder="Albuquerque" />
+                            <span asp-validation-for="City" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold small">ZIP Code</label>
+                            <input asp-for="PostalCode" class="form-control" required placeholder="87102" />
+                            <span asp-validation-for="PostalCode" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 py-2 fw-bold text-uppercase shadow-sm">
+                        Place Final Order
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Col 2: Pricing Summary Panel Box -->
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 p-4 rounded-3 bg-light position-sticky" style="top: 20px;">
+                <h5 class="fw-bold mb-3 text-dark">Order Pricing Invoice</h5>
+                
+                <div class="d-flex justify-content-between mb-2 text-muted small">
+                    <span>Items Subtotal:</span>
+                    <span class="fw-semibold text-dark">$@Model.Subtotal.ToString("F2")</span>
+                </div>
+                
+                <div class="alert alert-info border-0 p-2 my-3 rounded small">
+                    ℹ️ Shipping logic estimates drop fees instantly based on the city matching inputs provided. <strong>Free delivery applies across Albuquerque!</strong>
+                </div>
+
+                <div class="d-flex justify-content-between pt-3 border-top text-dark fw-bold fs-5">
+                    <span>Grand Total:</span>
+                    <span class="text-success">$@Model.Subtotal.ToString("F2")*</span>
+                </div>
+                <small class="text-muted d-block text-end mt-1">*Final delivery cost updated upon layout execution submission.</small>
+            </div>
+        </div>
+    </div>
+</div>
