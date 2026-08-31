@@ -16,7 +16,7 @@ namespace ThreeDPrintStore.Data
                 new Product
                 {
                     Name = "La Llorona Duck",
-                    Description = "Flexy articulated desktop dragon printed in a beautiful multi-color silk finish. Great for fidgeting.",
+                    Description = "This hauntingly charming duck pays tribute to one of New Mexico’s most iconic legends.",
                     Price = 5.00m,
                     StockQuantity = 12,
                     ImageUrl = "https://unsplash.com" // Placeholder clean 3D print render asset
@@ -24,7 +24,7 @@ namespace ThreeDPrintStore.Data
                 new Product
                 {
                     Name = "Red Chile Duck",
-                    Description = "Modern low-poly design pot perfect for small plants or desk succulents. Features integrated drainage holes.",
+                    Description = "Representing the deep, rich spice of New Mexico’s signature red chile, this duck radiates warmth and tradition.",
                     Price = 5.00m,
                     StockQuantity = 13,
                     ImageUrl = "https://unsplash.com"
@@ -32,7 +32,7 @@ namespace ThreeDPrintStore.Data
                 new Product
                 {
                     Name = "Green Chile Duck",
-                    Description = "Heavy-duty mechanical under-desk clamp designed to keep your audio headset secure and accessible.",
+                    Description = "Bold, flavorful, and proudly New Mexican—this duck celebrates the beloved green chile that defines the state’s cuisine",
                     Price = 5.00m,
                     StockQuantity = 8,
                     ImageUrl = "https://unsplash.com"
@@ -40,7 +40,7 @@ namespace ThreeDPrintStore.Data
                 new Product
                 {
                     Name = "Roswell Alien Duck",
-                    Description = "",
+                    Description = "A fun twist on New Mexico’s UFO capital, this extraterrestrial-inspired duck brings cosmic curiosity to life.",
                     Price = 5.00m,
                     StockQuantity = 8,
                     ImageUrl = "https://unsplash.com"
