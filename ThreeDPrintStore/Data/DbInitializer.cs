@@ -19,7 +19,7 @@ namespace ThreeDPrintStore.Data
                     Description = "This hauntingly charming duck pays tribute to one of New Mexico’s most iconic legends.",
                     Price = 5.00m,
                     StockQuantity = 12,
-                    ImageUrl = "https://unsplash.com" // Placeholder clean 3D print render asset
+                    ImageUrl = "/images/lallorona.jpg" // Placeholder clean 3D print render asset
                 },
                 new Product
                 {
@@ -27,7 +27,7 @@ namespace ThreeDPrintStore.Data
                     Description = "Representing the deep, rich spice of New Mexico’s signature red chile, this duck radiates warmth and tradition.",
                     Price = 5.00m,
                     StockQuantity = 13,
-                    ImageUrl = "https://unsplash.com"
+                    ImageUrl = "/images/redchile.jpg"
                 },
                 new Product
                 {
@@ -35,7 +35,7 @@ namespace ThreeDPrintStore.Data
                     Description = "Bold, flavorful, and proudly New Mexican—this duck celebrates the beloved green chile that defines the state’s cuisine",
                     Price = 5.00m,
                     StockQuantity = 8,
-                    ImageUrl = "https://unsplash.com"
+                    ImageUrl = "/images/greenchile.jpg"
                 },
                 new Product
                 {
@@ -43,7 +43,7 @@ namespace ThreeDPrintStore.Data
                     Description = "A fun twist on New Mexico’s UFO capital, this extraterrestrial-inspired duck brings cosmic curiosity to life.",
                     Price = 5.00m,
                     StockQuantity = 8,
-                    ImageUrl = "https://unsplash.com"
+                    ImageUrl = "/images/alien.jpg"
                 }
             };
 
