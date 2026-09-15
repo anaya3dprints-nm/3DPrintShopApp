@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ThreeDPrintStore.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ThreeDPrintStore.Controllers
 {

@@ -14,11 +14,17 @@ namespace ThreeDPrintStore.Controllers
         }
 
         // GET: / (Homepage)
+        public IActionResult Home()
+        {
+            //load the homepage view
+            return View("Home");
+        }
+
+        // GET: /Catalog
         public async Task<IActionResult> Index()
         {
-            // Pull all catalog items out of SQLite storage
             var activeInventory = await _context.Products.ToListAsync();
-            return View(activeInventory);
+            return View("Index", activeInventory); //Index.cshtml = Catalog page
         }
     }
 }
