@@ -1,9 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
-using ThreeDPrintStore.Models;
-using ThreeDPrintStore.Services;
+using Microsoft.AspNetCore.Mvc; //Allows your class to function as an MVC controller
+using System.Text.Json; //Provides JSON serialization and deserialization functionality.
+using ThreeDPrintStore.Models; //Gives access to model classes in your project.
+using ThreeDPrintStore.Services; //Gives access to service classes (like your shipping service).
 
-namespace ThreeDPrintStore.Controllers
+namespace ThreeDPrintStore.Controllers //Defines what namespace this controller belongs too
 {
     public class CheckoutController : Controller
     {
