@@ -1,9 +1,18 @@
-using System;
+using System; //imports the System namespace, which provides basic .NET functionality
 
-namespace ThreeDPrintStore.Services
+namespace ThreeDPrintStore.Services //declares the namespace where this service class lives
 {
-    public class PricingService
+    public class PricingService //class handles cost calculations for 3D printed jobs
     {
+
+        /**
+            Defines a method that:
+                Returns a decimal (money-safe value)
+                Takes:
+                    gramsUsed → amount of filament used
+                    printHours → number of hours the printer will run
+            This method calculates the final price of a custom print. 
+        **/
         public decimal CalculateCustomPrintPrice(double gramsUsed, double printHours)
         {
             // You can adjust these base numbers anytime to match your actual operational costs!
