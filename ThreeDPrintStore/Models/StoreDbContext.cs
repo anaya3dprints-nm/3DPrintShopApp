@@ -1,15 +1,24 @@
+//This import allows project to use Entity Framework Core
+This import allows model properties to use validation attributes like [Required], [EmailAddress], etc.
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace ThreeDPrintStore.Models
+namespace ThreeDPrintStore.Models //defines namespace where model classes live
 {
-    public class StoreDbContext : DbContext
+    public class StoreDbContext : DbContext //creates a class called StoreDbContext which inherits from DbContext. Represents my SQLite db connection and schema
     {
+
+        /**
+            This is the constructor for your database context.
+                DbContextOptions<StoreDbContext> contains the database configuration settings (like connection string).
+                : base(options) passes those settings to the base class, completing EF’s setup.
+                ASP.NET Core injects these options via dependency injection.
+        **/
         public StoreDbContext(DbContextOptions<StoreDbContext> options) : base(options) { }
 
-        public DbSet<Product> Products { get; set; } = null!;
-        public DbSet<QuoteRequest> QuoteRequests { get; set; } = null!;
-        public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<Product> Products { get; set; } = null!; //defines a table named Products in db
+        public DbSet<QuoteRequest> QuoteRequests { get; set; } = null!; //defines a table for quote requests users submit
+        public DbSet<Order> Orders { get; set; } = null!; //defines a db table for orders during checkout
 
     }
 
