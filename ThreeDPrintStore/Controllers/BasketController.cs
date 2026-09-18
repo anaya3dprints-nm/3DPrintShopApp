@@ -77,6 +77,7 @@ namespace ThreeDPrintStore.Controllers //Groups this controller inside the Contr
                         -Product: the db product record
                         -Quantity: how many of that item the user has
                         -TotalLinePrice - computed as (product price * quantity)
+                    **/
                     basketItems.Add(new BasketViewModel
                     {
                         Product = product,
