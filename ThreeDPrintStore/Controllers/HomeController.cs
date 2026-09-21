@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc; //enables the use of MVC features like controllers and actions
 using Microsoft.EntityFrameworkCore;//enables the use of Entity Framework Core features like database context and async queries
 using ThreeDPrintStore.Models;//allows access to the models defined in the ThreeDPrintStore.Models namespace, such as Product and StoreDbContext
+using System.Net.Http;
+using System.Text.Json;
 
 //This groups the HomeController class logically inside the Controllers foler of project
 namespace ThreeDPrintStore.Controllers

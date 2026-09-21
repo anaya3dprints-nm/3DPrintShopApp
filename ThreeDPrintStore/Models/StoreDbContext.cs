@@ -1,5 +1,5 @@
 //This import allows project to use Entity Framework Core
-This import allows model properties to use validation attributes like [Required], [EmailAddress], etc.
+//This import allows model properties to use validation attributes like [Required], [EmailAddress], etc.
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 

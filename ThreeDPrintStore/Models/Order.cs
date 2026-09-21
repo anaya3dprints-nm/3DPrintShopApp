@@ -21,7 +21,7 @@ namespace ThreeDPrintStore.Models //declares namespace
         public string City { get; set; } = string.Empty; //stores cutomer city
 
         [Required(ErrorMessage = "ZIP Code is required")] //required field
-        public string PostalCode { get; set; } = string.Empty; stores the postal code
+        public string PostalCode { get; set; } = string.Empty; //stores the postal code
 
         // Financial Breakdown Totals
         public decimal Subtotal { get; set; } //the subtotal cost of all cart items before shipping
