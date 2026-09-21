@@ -41,5 +41,32 @@ namespace ThreeDPrintStore.Controllers
             var activeInventory = await _context.Products.ToListAsync();
             return View("Index", activeInventory); //Index.cshtml = Catalog page
         }
+        //load national holiday JSON file
+        public List<NationalDay> GetNationalDays()
+        {
+            var path = Path.Combine(_env.WebRootPath, "data", "nationalDays.json");
+            var json = System.IO.File.ReadAllText(path);
+            return JsonSerializer.Deserialize<List<NationalDay>>(json);
+        }
+
+        //filter next 7 days of national holidays
+        public List <NationalDay> GetUpcomingNationalDays()
+        {
+            var allDays = GetNationalDays();
+
+            var today = DateTime.Today;
+            var weekAhead = today.AddDays(7);
+
+            return allDays
+                .Where(d => d.Date >= today && d.Date <= weekAhead)
+                .OrderBy(d => d.Date)
+                .ToList();
+        }
+
+        //update Home() Method to send data to Home.cshtml
+        public IActionResult Home()
+        {
+            var upcoming = GetUpComingNationalDays();
+            return View(upcoming);
     }
 }
