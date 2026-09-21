@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc; //enables the use of MVC features like controllers and actions
 using Microsoft.EntityFrameworkCore;//enables the use of Entity Framework Core features like database context and async queries
 using ThreeDPrintStore.Models;//allows access to the models defined in the ThreeDPrintStore.Models namespace, such as Product and StoreDbContext
-using System.Net.Http;
 using System.Text.Json;
+using Microsoft.AspNetCore.Hosting;
 
 //This groups the HomeController class logically inside the Controllers foler of project
 namespace ThreeDPrintStore.Controllers
@@ -14,12 +14,14 @@ namespace ThreeDPrintStore.Controllers
         //readonly means it can only be set once - in the constructor
         //You'll use _context to talk to the database (Products, ect.)
         private readonly StoreDbContext _context; 
+        private readonly IWebHostEnvironment _env; //variable to hold the web host environment, which provides information about the web server and the application's root path.    
 
         //ASP.NET Core's dependency injection system automatically provides a StoreDbCOntext when the controller is created.
         //This allows the controller to interact with the database without needing to manually create an instance of StoreDbContext.
-        public HomeController(StoreDbContext context)
+        public HomeController(StoreDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         //This method runs when the user goes to /Home/Home (or /Home if routed differently).
@@ -48,7 +50,7 @@ namespace ThreeDPrintStore.Controllers
         {
             var path = Path.Combine(_env.WebRootPath, "data", "nationalDays.json");
             var json = System.IO.File.ReadAllText(path);
-            return JsonSerializer.Deserialize<List<NationalDay>>(json);
+            return JsonSerializer.Deserialize<List<NationalDay>>(json) ?? new List<NationalDay>();
         }
 
         //filter next 7 days of national holidays
@@ -66,9 +68,10 @@ namespace ThreeDPrintStore.Controllers
         }
 
         //update Home() Method to send data to Home.cshtml
-        public IActionResult Home()
+        public IActionResult UpcomingHolidays()
         {
-            var upcoming = GetUpComingNationalDays();
-            return View(upcoming);
+            var upcoming = GetUpcomingNationalDays();
+            return View("Home",upcoming);
+        }
     }
 }
