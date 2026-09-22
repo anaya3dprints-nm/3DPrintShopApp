@@ -28,11 +28,11 @@ namespace ThreeDPrintStore.Controllers
         //IActionResult means it returns an MVC action (like a view)
         //return View("Home") tells ASP.NET to return the Home.cshtml view.
         //Action does not fetch data - it only return the Home.cshtml view.
-        public IActionResult Home()
+        /**public IActionResult Home()
         {
             //load the homepage view
             return View("Home");
-        }
+        }**/
 
         //async Task<IActionResult> - this action runs asynchronously because its doing a database call.
         //_context.Products - refers to the Products table in your database.
@@ -50,7 +50,13 @@ namespace ThreeDPrintStore.Controllers
         {
             var path = Path.Combine(_env.WebRootPath, "data", "nationalDays.json");
             var json = System.IO.File.ReadAllText(path);
-            return JsonSerializer.Deserialize<List<NationalDay>>(json) ?? new List<NationalDay>();
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true //ignore case when matching JSON property names to C# property names
+            };
+            
+            return JsonSerializer.Deserialize<List<NationalDay>>(json, options) ?? new List<NationalDay>(); //prevent null returns by using null-coalescing operator (??) to return an empty list if the deserialization result is null.
         }
 
         //filter next 7 days of national holidays
@@ -67,11 +73,11 @@ namespace ThreeDPrintStore.Controllers
                 .ToList();
         }
 
-        //update Home() Method to send data to Home.cshtml
-        public IActionResult UpcomingHolidays()
+        //Homepage + calendar feature
+        public IActionResult Home()
         {
             var upcoming = GetUpcomingNationalDays();
-            return View("Home",upcoming);
+            return View("Home",upcoming); // send model to Home.cshtml view
         }
     }
 }

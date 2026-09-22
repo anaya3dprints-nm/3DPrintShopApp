@@ -25,16 +25,42 @@ backwards. Because people have accidentlly miscalled me Anaya my entire life, I 
             gift it, or do whatever they want with it.
         </p>
 </div>
-            </div>
+           
 
-        <div class="card shadow-sm p-4 rounded-3 mt-4">
-            <h4 class="fw-bold text-dark mb-2">Standard Shipping</h4>
-            <div class="card shadow-sm">
-                    <p class="text-muted mb-0"> 
-                Perfect for customers who want their prints delivered straight to their door. Available for 
-                    all locations outside Albuquerque and for anyone who prefers traditional delivery.
-                    </p>
-                </div>
+<section class="container my-5">
+    <h2 class="text-center mb-4">Upcoming Fun National Holidays</h2>
+
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var group in Model.GroupBy(d => d.Date))
+        {
+            <div class="card shadow-sm mb-4 p-3">
+                
+                <h4 class="fw-bold">@group.Key.ToString("dddd, MMMM dd")</h4>
+
+                @foreach (var day in group)
+                {
+                    <div class="d-flex align-items-center my-3">
+
+                        <!-- Holiday Image -->
+                        @day.Image
+
+                        <!-- Holiday Name -->
+                        <span class="fs-5">@day.Name</span>
+                    </div>
+                }
+
+                <p class="text-muted mt-3">
+                    A themed 3D print for these holidays will be hidden soon — follow my TikTok for hints!
+                </p>
+
             </div>
-    </div>
-</div>
+        }
+    }
+    else
+    {
+        <p class="text-muted text-center">No holidays found this week.</p>
+       
+    }
+</section>
+
