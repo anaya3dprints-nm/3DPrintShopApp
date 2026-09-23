@@ -2,97 +2,97 @@
   {
     "date": "2026-09-22T00:00:00",
     "name": "National Ice Cream Done Day",
-    "image": "wwwroot/images/national/icecream.jfif"
+    "image": "/images/national/icecream.jpg"
   },
   { 
     "date": "2026-09-22T00:00:00",
     "name": "Hobbit Day",
-    "image": "wwwroot/images/national/hobbit.jfif"
+    "image": "/images/national/hobbit.jpg"
   },
   {
     "date": "2026-09-23T00:00:00",
     "name": "National Great American Pot Pie Day",
-    "image": "wwwroot/images/national/potpie.jfif"
+    "image": "/images/national/potpie.jpg"
   },
   {
     "date": "2026-09-23T00:00:00",
     "name": "Restless Legs Awareness Day",
-    "image": "wwwroot/images/national/restlesslegs.jfif"
+    "image": "/images/national/restlesslegs.jpg"
   },
   {
     "date": "2026-09-24T00:00:00",
     "name": "National Punctuation Day",
-    "image": "wwwroot/images/national/punctuation.jfif"
+    "image": "/images/national/punctuation.jpg"
   },
   {
     "date": "2026-09-25T00:00:00",
     "name": "National Lobster Day",
-    "image": "wwwroot/images/national/lobster.jfif"
+    "image": "/images/national/lobster.jpg"
   },
   {
     "date": "2026-09-25T00:00:00",
     "name": "National Quesadilla Day",
-    "image": "wwwroot/images/national/quesadilla.jfif"
+    "image": "/images/national/quesadilla.jpg"
   },
   {
     "date": "2026-09-25T00:00:00",
     "name": "National Comic Book Day",
-    "image": "wwwroot/images/national/comicbook.jfif"
+    "image": "/images/national/comicbook.jpg"
   },
   {
     "date": "2026-09-26T00:00:00",
     "name": "National Pancake Day",
-    "image": "wwwroot/images/national/pancake.jfif"
+    "image": "/images/national/pancake.jpg"
   },
   {
     "date": "2026-09-26T00:00:00",
     "name": "National Hunting and Fishing Day",
-    "image": "wwwroot/images/national/huntingfish.jfif"
+    "image": "/images/national/huntingfish.jpg"
   },
   {
     "date": "2026-09-27T00:00:00",
     "name": "Gold Star Mother's and Family Day",
-    "image": "wwwroot/images/national/goldstar.jfif"
+    "image": "/images/national/goldstar.jpg"
   },
   {
     "date": "2026-09-28T00:00:00",
     "name": "National Drink Beer Day",
-    "image": "wwwroot/images/national/beer.jfif"
+    "image": "/images/national/beer.jpg"
   },
   {
     "date": "2026-09-29T00:00:00",
     "name": "National Coffee Day",
-    "image": "wwwroot/images/national/coffee.jfif"
+    "image": "/images/national/coffee.jpg"
   },
   {
     "date": "2026-09-30T00:00:00",
     "name": "National Chewing Gum Day",
-    "image": "wwwroot/images/national/gum.jfif"
+    "image": "/images/national/gum.jpg"
   },
   {
     "date": "2026-10-01T00:00:00",
     "name": "National Pumpkin Spice Day",
-    "image": "wwwroot/images/national/pumpkinspice.jfif"
+    "image": "/images/national/pumpkinspice.jpg"
   },
   {
     "date": "2026-10-02T00:00:00",
     "name": "National Smarties Day",
-    "image": "wwwroot/images/national/"
+    "image": "/images/national/smarties.jpg"
   },
   {
     "date": "2026-10-03T00:00:00",
     "name": "National Techies Day",
-    "image": "wwwroot/images/national/techies.jfif"
+    "image": "/images/national/techies.jpg"
   },
   {
     "date": "2026-10-04T00:00:00",
     "name": "National Golf Lover's Day",
-    "image": "wwwroot/images/national/golf.jfif"
+    "image": "/images/national/golf.jpg"
   },     
   {
     "date": "2026-10-04T00:00:00",
     "name": "National Cinnamon Bun Day",
-    "image": "wwwroot/images/national/cinnabon.jfif"
+    "image": "/images/national/cinnabon.jpg"
   }   
     
   ]

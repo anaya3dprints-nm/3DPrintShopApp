@@ -25,6 +25,7 @@ builder.Services.AddSession(options =>
 });
 
 var app = builder.Build();
+app.UseStaticFiles();
 
 // Seed the SQLite database with products automatically on boot
 using (var scope = app.Services.CreateScope())
