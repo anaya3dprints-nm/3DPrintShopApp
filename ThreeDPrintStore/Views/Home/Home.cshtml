@@ -32,15 +32,22 @@ backwards. Because people have accidentlly miscalled me Anaya my entire life, I 
 
     @if (Model != null && Model.Any())
     {
-        @foreach (var group in Model.GroupBy(d => d.Date))
-        {
-            <div class="card shadow-sm mb-4 p-3">
-                
-                <h4 class="fw-bold">@group.Key.ToString("dddd, MMMM dd")</h4>
+        <div class="holiday-scroll-container">
 
-                @foreach (var day in group)
-                {
-                    <div class="d-flex align-items-center my-3">
+            @foreach (var group in Model.GroupBy(d => d.Date))
+            {
+                <div class="holiday-card">
+                    <h4 class="holiday-date">
+                        @group.Key.ToString("dddd, MMMM dd")
+                    </h4>
+
+                    <ul class="holiday-list">
+                        @foreach (var day in group)
+                        {
+                            <li class="holiday-item">
+                                <span class="holiday-name">@day.Name</span>
+                            </li>
+                    </ul>
 
                         <!-- Holiday Image -->
                         <img src="@day.Image" alt="@day.Image" style="max-width: 100px; height: auto"/>
