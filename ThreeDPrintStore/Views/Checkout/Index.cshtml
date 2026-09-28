@@ -41,6 +41,55 @@
                             <input asp-for="PostalCode" class="form-control" required placeholder="87102" />
                             <span asp-validation-for="PostalCode" class="text-danger small"></span>
                         </div>
+                                        <!-- START OF DYNAMIC DELIVERY OPTIONS -->
+                <div class="mt-4 pt-3 border-top">
+                    <h5 class="fw-bold mb-3 text-secondary">Fulfillment Options</h5>
+                    
+                    <!-- Standard Shipping (Always Visible by default) -->
+                    <div class="form-check p-3 border rounded mb-2 bg-light d-flex align-items-center" id="shipping-option-container">
+                        <input class="form-check-input ms-0 me-3" type="radio" asp-for="DeliveryType" value="Shipping" id="deliveryShipping" checked>
+                        <label class="form-check-label w-100" for="deliveryShipping">
+                            <span class="fw-bold d-block">📦 Standard Mail Shipping</span>
+                            <span class="text-muted small">Your custom models are safely packaged and sent directly to your door.</span>
+                        </label>
+                    </div>
+
+                    <!-- Albuquerque Local Options Container (Hidden by default via d-none) -->
+                    <div id="albuquerque-options" class="d-none">
+                        <!-- Free Local Delivery -->
+                        <div class="form-check p-3 border rounded border-success mb-2 bg-white d-flex align-items-center">
+                            <input class="form-check-input ms-0 me-3" type="radio" asp-for="DeliveryType" value="FreeDelivery" id="deliveryFree">
+                            <label class="form-check-label w-100" for="deliveryFree">
+                                <span class="fw-bold text-success d-block">🚗 Free Local Delivery (ABQ Exclusive)</span>
+                                <span class="text-muted small">Skip the shipping fees entirely! Hand-delivered locally at zero extra cost.</span>
+                            </label>
+                        </div>
+
+                        <!-- Premium Cache Drop -->
+                        <div class="form-check p-3 border rounded border-primary mb-2 bg-white d-flex align-items-center">
+                            <input class="form-check-input ms-0 me-3" type="radio" asp-for="DeliveryType" value="PremiumCacheDrop" id="deliveryCache">
+                            <label class="form-check-label w-100" for="deliveryCache">
+                                <span class="fw-bold text-primary d-block">📍 Premium Cache Drop Scavenger Hunt</span>
+                                <span class="text-muted small">Turn delivery into a game! I'll hide your package safely and send a private photo/video clue <strong>only to you</strong>. Includes your order PLUS a bonus copy of the community model you sponsor!</span>
+                            </label>
+                        </div>
+
+                        <!-- Conditional Community Model Selection (Hidden unless Premium Cache Drop is checked) -->
+                        <div id="community-model-selection" class="mt-2 p-3 bg-light border rounded border-primary d-none">
+                            <label class="form-label fw-bold text-primary small mb-1" for="SponsoredCommunityModelId">Choose Your Sponsored Community Model Drop:</label>
+                            <select class="form-select form-select-sm" asp-for="SponsoredCommunityModelId">
+                                <option value="1">Mini Octopus</option>
+                                <option value="2">Articulated Dragon</option>
+                                <option value="3">Low-Poly Skull</option>
+                                <option value="4">Surprise Me!</option>
+                            </select>
+                            <span class="text-muted d-block mt-1" style="font-size: 0.75rem;">Your selection dictates the twin duplicate model hidden publicly for the city TikTok hunt!</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- END OF DYNAMIC DELIVERY OPTIONS -->
+
+                        
                     </div>
 
                     <div class="checkout-terms-section">
