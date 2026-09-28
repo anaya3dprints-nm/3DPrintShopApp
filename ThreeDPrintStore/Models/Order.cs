@@ -26,7 +26,15 @@ namespace ThreeDPrintStore.Models //declares namespace
         // Financial Breakdown Totals
         public decimal Subtotal { get; set; } //the subtotal cost of all cart items before shipping
         public decimal ShippingFee { get; set; } //cost of shipping added after subtotal
-        public decimal GrandTotal => Subtotal + ShippingFee; //a computed property (read-only) that returns: Subtotal + Shippingfee
+
+        //Scavenger Hunt Workflow
+        [Required(ErrorMessage = "Delivery type selection is required")]
+        public string DeliveryType { get; set; } = "Shipping";
+        public decimal CacheUpgradeFee { get; set; }
+        public int? SponsoredCommunityModelId { get; set; }
+        public string? PrivateClueMediaUrl { get; set; }
+        
+        public decimal GrandTotal => Subtotal + ShippingFee + CacheUpgradeFee; //a computed property (read-only) that returns: Subtotal + Shippingfee
 
         //Stores the date the order was created
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
