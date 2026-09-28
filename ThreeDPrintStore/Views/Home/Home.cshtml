@@ -5,12 +5,12 @@
 }
 
 
-    <img src="/images/bizlogo.png" alt="Anaya 3D Prints Logo" class="img-fluid mb-3 mx-auto" style="max-width: 200px;">
+    <img src="/images/bizlogo.png" alt="Anaya 3D Prints Logo" class="img-fluid mb-3 mx-auto d-block" style="max-width: 200px;">
 <div class="container p-5 my-5 bg-dark text-white text-center">
     <h1>Welcome to Anaya 3D Prints</h1>
     <p class="lead">
         My name is Ayana, which is my mom's last name ("Anaya") spelled
-backwards. Because people have accidentlly miscalled me Anaya my entire life, I turned a lifelong
+        backwards. Because people have accidentlly miscalled me Anaya my entire life, I turned a lifelong
         running joke into the identity of my 3D business.
     </p>
 </div>
@@ -46,24 +46,27 @@ backwards. Because people have accidentlly miscalled me Anaya my entire life, I 
                         {
                             <li class="holiday-item">
                                 <span class="holiday-name">@day.Name</span>
-                            </li>
+                          </li>
+                        }
                     </ul>
-
-                        <!-- Holiday Image -->
+            
+                    <!-- Holiday Image -->
+                    @foreach (var day in group)
+                    {
                         <img src="@day.Image" alt="@day.Image" style="max-width: 100px; height: auto"/>
-
-                        <!-- Holiday Name -->
-                        <span class="fs-5">@day.Name</span>
+                        
+                    }
+                    
                     </div>
                 }
 
+               </div>  
                 <p class="text-muted mt-3">
                     A themed 3D print for these holidays will be hidden soon — follow my TikTok for hints!
                 </p>
 
-            </div>
-        }
-    }
+             }
+    
     else
     {
         <p class="text-muted text-center">No holidays found this week.</p>

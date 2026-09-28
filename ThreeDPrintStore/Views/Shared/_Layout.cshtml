@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ThreeDPrintStore.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://jsdelivr.net"> 
 </head>
 <body>
     <header>
@@ -32,6 +33,13 @@
             </ul>
             <!-- Separated administrative layout gateway link -->
             <ul class="navbar-nav">
+                <!--basket icon with link to cart page-->
+                <li class="nav-item d-flex align-items-center me-3">
+                    <a class="nav-link text-dark fw-semibold position-relative d-inline-flex align-items-center" asp-controller="Basket" asp-action="Index">
+                        <i class="bi bi-basket3-fill fs-5 me-1"></i> Basket
+                        <span id="basket-badge" class="badge rounded-pill bg-danger ms-1" style="display: none; font-size: 0.75rem;">0</span>
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link text-danger fw-bold border border-danger rounded px-2" asp-controller="Admin" asp-action="Dashboard">🔒 Admin Dashboard</a>
                 </li>
