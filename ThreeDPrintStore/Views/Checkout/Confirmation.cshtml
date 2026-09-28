@@ -17,18 +17,50 @@
         <div class="bg-light p-4 rounded-3 text-start my-4">
             <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Invoice Reference:</span><strong class="text-dark">#@Model.Id</strong></div>
             <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Shipping Destination:</span><strong class="text-dark">@Model.City, @Model.PostalCode</strong></div>
-            <div class="d-flex justify-content-between mb-2 small"><span class="text-muted">Fulfillment Class:</span>
-                @if (Model.ShippingFee == 0)
+            <div class="d-flex justify-content-between mb-2 small">
+                <span class="text-muted">Fulfillment Class:</span>
+
+                @if (Model.DeliveryType == "PremiumCacheDrop")
                 {
-                    <span class="text-success fw-bold">Free Local ABQ Delivery</span>
+                    <span class="text-primary fw-bold">Premium Cache Drop Upgrade</span>
+                }
+                else if (Model.DeliveryType == "FreeDelivery")
+                {
+                    <span class="text-success fw-bold">Free local ABQ Delivery</span>
                 }
                 else
                 {
-                    <span class="text-dark fw-bold">$@Model.ShippingFee.ToString("F2") Flat Shipping</span>
+                    <span class="text-dark fw-bold">Standard Shipping ($@Model.ShippingFee.ToString("F2"))</span>
                 }
             </div>
             <hr>
             <div class="d-flex justify-content-between align-items-center fw-bold fs-5 text-dark"><span>Amount Paid:</span><span class="text-success">$@Model.GrandTotal.ToString("F2")</span></div>
+        </div>
+        <div class="text-start border p-3 rounded mb-4">
+            @if (Model.DeliveryType == "PremiumCacheDrop")
+            {
+                <h5 class="fw-bold text-primary mb-2">📍 What Happens Next?</h5>
+                <p class="small text-muted mb-0">
+                    I am firing up the printers! Once your custom order and your sponsored community model copies are complete, I will safely stash your package out in the wild here in Albuquerque. 
+                </p>
+                <p class="small text-dark fw-semibold mt-2 mb-0">
+                    Keep a close eye on your inbox! I will upload your private video or photo clues directly to your account status portal as soon as the drop is made.
+                </p>
+            }
+            else if (Model.DeliveryType == "FreeDelivery")
+            {
+                <h5 class="fw-bold text-success mb-2">🚗 Standard Delivery Tracking</h5>
+                <p class="small text-muted mb-0">
+                    Since you are local to the Albuquerque area, your order qualifies for free delivery! I will print your custom items and hand-deliver them straight to your specified address. Look out for a dispatch confirmation email soon.
+                </p>
+            }
+            else
+            {
+                <h5 class="fw-bold text-dark mb-2">📦 Postal Mail Tracking</h5>
+                <p class="small text-muted mb-0">
+                    Your custom prints are queued up for fabrication. Once they are cleaned and processed, we will ship them straight to your door via standard mail services and email you a tracking link.
+                </p>
+            }
         </div>
 
         <a href="/" class="btn btn-primary w-100 py-2 fw-semibold">Continue Browsing</a>

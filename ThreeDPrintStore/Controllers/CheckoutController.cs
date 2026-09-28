@@ -45,10 +45,34 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
             if (!basket.Any()) return RedirectToAction("Index", "Home"); //if basket is empty, redirect the user to the Home page
 
             order.Subtotal = CalculateBasketSubtotal(basket); //calculates the subtotal cost of all items and assigns it to the order's Subtotal property
-            
-            // Execute the Shipping Matrix Engine matching against Albuquerque limits
-            order.ShippingFee = _shippingService.CalculateShipping(order.City, order.PostalCode); //Uses ShippingService to calculate shipping cost based on the order's city and postal code
 
+            //format and check the incoming city string
+            string sanitizedCity = order.City.Trim().ToLower();
+            bool isAlbuquerque = sanitizedCity == "albuquerque" || sanitizedCity = "abq";
+
+            //process according to their selected deliverytype and choice
+            if (order.DeliveryType == "PremiumCacheDrop" && isAlbuquerque)
+            {
+                order.ShippingFee = 0.00m;
+                order.CacheUpgradeFee = 10.00m;
+            }
+            else if (order.DeliveryType == "FreeDelivery" && isAlbuquerque)
+            {
+                order.ShippingFee = 0.00m;
+                order.CacheUpgradeFee = 0.00m;
+                order.SponsoredCommunityModelId = null;
+            }
+            else
+            {
+                //out of towners or safety fallback
+                order.DeliveryType = "Shipping";
+                order.CacheUpgradeFee = 0.00m;
+                order.SponsoredCommunityModelId = null;
+                
+                // Execute the Shipping Matrix Engine matching against Albuquerque limits
+                order.ShippingFee = _shippingService.CalculateShipping(order.City, order.PostalCode); //Uses ShippingService to calculate shipping cost based on the order's city and postal code
+            }
+            
             //checks whether the posted form data passed validation rules
             if (ModelState.IsValid)
             {
