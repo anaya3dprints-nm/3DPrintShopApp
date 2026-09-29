@@ -48,7 +48,7 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
 
             //format and check the incoming city string
             string sanitizedCity = order.City.Trim().ToLower();
-            bool isAlbuquerque = sanitizedCity == "albuquerque" || sanitizedCity = "abq";
+            bool isAlbuquerque = sanitizedCity == "albuquerque" || sanitizedCity == "abq";
 
             //process according to their selected deliverytype and choice
             if (order.DeliveryType == "PremiumCacheDrop" && isAlbuquerque)

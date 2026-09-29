@@ -101,9 +101,18 @@ namespace ThreeDPrintStore.Controllers //Groups this controller inside the Contr
             if (basket.ContainsKey(productId)) //Checks if the product already exists in the basket
             {
                 basket[productId]++; //If it exists, increase the quantity by 1
-                SaveBasketToSession(basket); //saves the modified basket back into the season
             }
-            return RedirectToAction("Index"); //redirects the user back to the basket page, causing it to refresh and show updated quantities.
+            else
+            {
+                basket.Add(productId, 1); //If it does not exist, add it to the basket with a quantity of 1
+            }
+            //save modified basket back to session
+            SaveBasketToSession(basket);
+
+            //calculate the new total item count
+            int totalItemCount = basket.Values.Sum();
+            HttpContext.Session.SetInt32("BasketItemCount", totalItemCount); //Store the total item count in session for UI updates
+            return Json(new { success = true, newCount = totalItemCount }); //Return a JSON response indicating success and the new item count
         }
 
             //Marks this action as an HTTP POST endpoint at /Basket/Decrease

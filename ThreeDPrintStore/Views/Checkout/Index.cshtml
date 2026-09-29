@@ -140,52 +140,5 @@
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Target the core layout inputs and containers
-            const cityInput = document.getElementById("City");
-            const abqOptionsContainer = document.getElementById("albuquerque-options");
-            const shippingRadio = document.getElementById("deliveryShipping");
-            const cacheRadio = document.getElementById("deliveryCache");
-            const communitySelectContainer = document.getElementById("community-model-selection");
 
-            function evaluateDeliveryVisibility() {
-                // Read input and sanitize spacing / character casing
-                const cityValue = cityInput.value.trim().toLowerCase();
-
-                if (cityValue === "albuquerque" || cityValue === "abq") {
-                    // Show local delivery options by dropping Bootstrap's display-none utility class
-                    abqOptionsContainer.classList.remove("d-none");
-                } else {
-                    // Hide local delivery choices
-                    abqOptionsContainer.classList.add("d-none");
-                    // Force selection back to safe fallback default (Standard Shipping)
-                    shippingRadio.checked = true;
-                    toggleCommunityMenu();
-                }
-            }
-
-            function toggleCommunityMenu() {
-                // Show community dropdown menu only if Premium Cache Drop is actively selected
-                if (cacheRadio.checked && !abqOptionsContainer.classList.contains("d-none")) {
-                    communitySelectContainer.classList.remove("d-none");
-                } else {
-                    communitySelectContainer.classList.add("d-none");
-                }
-            }
-
-            // Bind change evaluation triggers to keyboard input behaviors
-            cityInput.addEventListener("input", evaluateDeliveryVisibility);
-            
-            // Listen for structural state changes across all added radio buttons
-            document.querySelectorAll('input[name="DeliveryType"]').forEach(radio => {
-                radio.addEventListener("change", toggleCommunityMenu);
-            });
-
-            // Initial run in case the browser auto-fills the city on navigation load
-            evaluateDeliveryVisibility();
-        });
-    </script>
-}
 
