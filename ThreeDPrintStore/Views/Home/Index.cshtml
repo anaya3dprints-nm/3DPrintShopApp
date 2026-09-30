@@ -63,7 +63,7 @@
                         </div>
 
                         <!-- Action Form: Adds item parameters safely to user's checkout session cookie -->
-                        <form action="/Basket/Add" method="post" class="mt-auto">
+                        <form action="/Basket/Increase" method="post" class="mt-auto add-to-basket-form">
                             <input type="hidden" name="productId" value="@product.Id" />
                             <button type="submit" class="btn btn-outline-primary w-100 fw-semibold align-items-center justify-content-center" @(product.StockQuantity == 0 ? "disabled" : "")>
                                 Add to Basket
@@ -75,3 +75,45 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const basketForms = document.querySelectorAll('.add-to-basket-form');
+            basketForms.forEach(form => {
+                form.addEventListener("submit", function (event) {
+                    event.preventDefault(); 
+                    const formData = new FormData(this);
+
+                    const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+                    const token = tokenElement ? tokenElement.value : '';
+
+                    fetch(this.action, {
+                        method: this.method,
+                        body: formData,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'RequestVerificationToken': token  }
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error("Network error");
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Basket update response:", data);
+                        if (data.success) {
+                            const badgeContainer = document.getElementById("cart-badge-container");
+                            if (badgeContainer) {
+                                if (data.newCount > 0) {
+                                    badgeContainer.innerHTML = `<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">${data.newCount}</span>`;
+                                } else {
+                                    badgeContainer.innerHTML = '';
+                                }
+                            }
+                            alert("Item added to basket!");
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+                });
+            });
+        });
+    </script>
+}
