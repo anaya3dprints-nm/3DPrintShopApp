@@ -55,7 +55,7 @@
                     </div>
 
                     <!-- Albuquerque Local Options Container (Hidden by default via d-none) -->
-                    <div id="albuquerque-options" class="d-none">
+                    <div id="albuquerque-options">
                         <!-- Free Local Delivery -->
                         <div class="form-check p-3 border rounded border-success mb-2 bg-white d-flex align-items-center">
                             <input class="form-check-input ms-0 me-3" type="radio" asp-for="DeliveryType" value="FreeDelivery" id="deliveryFree">
@@ -75,7 +75,7 @@
                         </div>
 
                         <!-- Conditional Community Model Selection (Hidden unless Premium Cache Drop is checked) -->
-                        <div id="community-model-selection" class="mt-2 p-3 bg-light border rounded border-primary d-none">
+                        <div id="community-model-selection" class="mt-2 p-3 bg-light border rounded border-primary">
                             <label class="form-label fw-bold text-primary small mb-1" for="SponsoredCommunityModelId">Choose Your Sponsored Community Model Drop:</label>
                             <select class="form-select form-select-sm" asp-for="SponsoredCommunityModelId">
                                 <option value="1">Mini Octopus</option>
@@ -139,6 +139,52 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Get DOM elements from your form bindings
+            const cityInput = document.querySelector('input[asp-for="City"]');
+            const albuquerqueOptions = document.getElementById("albuquerque-options");
+            const communityModelSelection = document.getElementById("community-model-selection");
+            const deliveryRadios = document.querySelectorAll('input[name="DeliveryType"]');
+
+            // 1. Function to show/hide local options based on City input
+            function toggleCityOptions() {
+                const cityValue = cityInput.value.trim().toLowerCase();
+                // Check if the user typed Albuquerque or common short forms
+                if (cityValue === "albuquerque" || cityValue === "abq") {
+                    albuquerqueOptions.classList.remove("d-none");
+                } else {
+                    albuquerqueOptions.classList.add("d-none");
+                    // Reset selection back to standard shipping if local is hidden
+                    document.getElementById("deliveryShipping").checked = true;
+                    toggleCommunityDropdown();
+                }
+            }
+
+            // 2. Function to show/hide community model dropdown based on selection
+            function toggleCommunityDropdown() {
+                const selectedCardOption = document.querySelector('input[name="DeliveryType"]:checked');
+                if (selectedCardOption && selectedCardOption.value === "PremiumCacheDrop") {
+                    communityModelSelection.classList.remove("d-none");
+                } else {
+                    communityModelSelection.classList.add("d-none");
+                }
+            }
+
+            // 3. Attach Event Listeners
+            cityInput.addEventListener("input", toggleCityOptions);
+            deliveryRadios.forEach(radio => {
+                radio.addEventListener("change", toggleCommunityDropdown);
+            });
+
+            // Run initial check in case city is pre-filled
+            toggleCityOptions();
+            toggleCommunityDropdown();
+        });
+    </script>
+}
 
 
 

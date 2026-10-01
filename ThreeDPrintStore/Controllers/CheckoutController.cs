@@ -42,7 +42,11 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
         public async Task<IActionResult> PlaceOrder(Order order) //defines asynchronous action method named PlaceOrder that receives an order onject from submitted form
         {
             var basket = GetBasketFromSession(); //retrieves the user's shopping basket from session memory
-            if (!basket.Any()) return RedirectToAction("Index", "Home"); //if basket is empty, redirect the user to the Home page
+            if (basket == null || !basket.Any())
+            {
+                ModelState.AddModelError("", "Your shopping cart session has expired.");
+                return View("Index", order);
+            }
 
             order.Subtotal = CalculateBasketSubtotal(basket); //calculates the subtotal cost of all items and assigns it to the order's Subtotal property
 
@@ -73,35 +77,99 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
                 order.ShippingFee = _shippingService.CalculateShipping(order.City, order.PostalCode); //Uses ShippingService to calculate shipping cost based on the order's city and postal code
             }
             
+            order.GrandTotal = order.Subtotal + order.ShippingFee + order.CacheUpgradeFee;
             //checks whether the posted form data passed validation rules
             if (ModelState.IsValid)
             {
-                // Save Order record cleanly to SQLite
-                //adds the order object to the Orders table in the db context (but does not save yet)
-                _context.Orders.Add(order);
+                //temporarily save the calculated order details inso session
+                var orderJson = System.Text.Json.JsonSerializer.Serialize(order);
+                HttpContext.Session.SetString("PendingCheckoutOrder", orderJson);
 
-                // Deduct stock quantities from inventory levels
-                foreach (var item in basket) //iterates through each product in the user's basket
-                {
-                    var product = await _context.Products.FindAsync(item.Key); //looks up the product from the db using its ID (the item.Key)
-                    if (product != null) //ensures the product exists
-                    {
-                        //reduces inventory stock by the quantity purchased
-                        //Math.Max prevents negative inventory (sets minimun to 0)
-                        product.StockQuantity = Math.Max(0, product.StockQuantity - item.Value);
-                    }
-                }
-                
-                await _context.SaveChangesAsync(); //saves all changes made above. The new order and updated product stock quantities. Everything is committed to the db
-
-                // Clear out basket cookies session memory state completely
-                HttpContext.Session.Remove(BasketSessionKey); //deletes the basket from session storage so the user's cart is now empty
-
-                return RedirectToAction("Confirmation", new { id = order.Id }); //redirects the user to confirmation page, passing newly created order ID
+                //redirect the user straight to the new payment screen
+                return RedirectToAction("PaymentSummary");
             }
 
             return View("Index", order); //If ModelState was not valid earlier, reload the Index view and show validation errors
         }
+
+        // GET: /Checkout/PaymentSummary
+        [HttpGet]
+        public IActionResult PaymentSummary()
+        {
+            // 1. Pull the temporary data package out of the user's session memory
+            var pendingJson = HttpContext.Session.GetString("PendingCheckoutOrder");
+
+            // 2. Safety Check: If the package is empty (like if someone typed the URL manually), send them back
+            if (string.IsNullOrEmpty(pendingJson))
+            {
+                return RedirectToAction("Index");
+            }
+
+            // 3. Unpack the JSON back into an actual "Order" object that C# understands
+            var order = System.Text.Json.JsonSerializer.Deserialize<Order>(pendingJson);
+
+            // 4. Send that unpacked order data to your new Payment webpage view
+            return View(order);
+        }
+
+        // POST: /Checkout/ProcessSecurePayment
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> ProcessSecurePayment()
+{
+    // 1. Grab that same temporary order package out of session memory again
+    var pendingJson = HttpContext.Session.GetString("PendingCheckoutOrder");
+    if (string.IsNullOrEmpty(pendingJson))
+    {
+        return RedirectToAction("Index");
+    }
+
+    var order = System.Text.Json.JsonSerializer.Deserialize<Order>(pendingJson);
+
+    if (order == null)
+            {
+                ModelState.AddModelError("", "We ran into an issue retrieving your order details. Please try again.");
+                return RedirectToAction("Index");
+            }
+
+    // 2. Fetch their actual shopping basket items so we know what they are buying
+    var basket = GetBasketFromSession();
+
+    // 3. PAYMENT GATEWAY PLACEHOLDER
+    // In a live production app, this is where you would connect to Stripe or PayPal API.
+    // If the card is declined, you would return an error here. We will assume success!
+
+    // 4. NOW it is safe to add the order record to your SQLite context
+    _context.Orders.Add(order);
+
+    // 5. Loop through their shopping basket to safely reduce warehouse stock levels
+    if (basket != null)
+    {
+        foreach (var item in basket)
+        {
+            // item.Key is the Product ID, item.Value is the Quantity they bought
+            var product = await _context.Products.FindAsync(item.Key);
+            if (product != null)
+            {
+                // Math.Max guarantees stock never accidentally drops below zero
+                product.StockQuantity = Math.Max(0, product.StockQuantity - item.Value);
+            }
+        }
+    }
+
+    // 6. Push all changes (the new order record + updated stock levels) to your database at once!
+    await _context.SaveChangesAsync();
+
+    // 7. Clean up! Wipe out their temporary checkout sessions and empty their shopping basket
+    HttpContext.Session.Remove("PendingCheckoutOrder");
+    HttpContext.Session.Remove(BasketSessionKey);
+
+    // 8. Send them straight to your working order success page, passing their new database Order ID
+    return RedirectToAction("Confirmation", new { id = order.Id });
+}
+
+
+
 
         // 3. GET: /Checkout/Confirmation/5
         [HttpGet]

@@ -29,12 +29,12 @@ namespace ThreeDPrintStore.Models //declares namespace
 
         //Scavenger Hunt Workflow
         [Required(ErrorMessage = "Delivery type selection is required")]
-        public string DeliveryType { get; set; } = "Shipping";
+        public string DeliveryType { get; set; } = "Standard";
         public decimal CacheUpgradeFee { get; set; }
         public int? SponsoredCommunityModelId { get; set; }
         public string? PrivateClueMediaUrl { get; set; }
-        
-        public decimal GrandTotal => Subtotal + ShippingFee + CacheUpgradeFee; //a computed property (read-only) that returns: Subtotal + Shippingfee
+        [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+        public decimal GrandTotal { get; set; } = 0.00m;
 
         //Stores the date the order was created
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
