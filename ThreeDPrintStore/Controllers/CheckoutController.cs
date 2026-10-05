@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc; //Allows your class to function as an MVC contro
 using System.Text.Json; //Provides JSON serialization and deserialization functionality.
 using ThreeDPrintStore.Models; //Gives access to model classes in your project.
 using ThreeDPrintStore.Services; //Gives access to service classes (like your shipping service).
+using Stripe;
 
 namespace ThreeDPrintStore.Controllers //Defines what namespace this controller belongs too
 {
@@ -39,7 +40,7 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
 
         // 2. POST: /Checkout/PlaceOrder
         [HttpPost] //marks this controller action as responding to HTTP POST requests. Called when user submits form
-        public async Task<IActionResult> PlaceOrder(Order order) //defines asynchronous action method named PlaceOrder that receives an order onject from submitted form
+        public IActionResult PlaceOrder(Order order) //defines asynchronous action method named PlaceOrder that receives an order onject from submitted form
         {
             var basket = GetBasketFromSession(); //retrieves the user's shopping basket from session memory
             if (basket == null || !basket.Any())
@@ -51,7 +52,9 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
             order.Subtotal = CalculateBasketSubtotal(basket); //calculates the subtotal cost of all items and assigns it to the order's Subtotal property
 
             //format and check the incoming city string
-            string sanitizedCity = order.City.Trim().ToLower();
+            string cityInput = order.City ?? "";
+            string postalInput = order.PostalCode ?? "";
+            string sanitizedCity = cityInput.Trim().ToLower();
             bool isAlbuquerque = sanitizedCity == "albuquerque" || sanitizedCity == "abq";
 
             //process according to their selected deliverytype and choice
@@ -74,7 +77,7 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
                 order.SponsoredCommunityModelId = null;
                 
                 // Execute the Shipping Matrix Engine matching against Albuquerque limits
-                order.ShippingFee = _shippingService.CalculateShipping(order.City, order.PostalCode); //Uses ShippingService to calculate shipping cost based on the order's city and postal code
+                order.ShippingFee = _shippingService.CalculateShipping(cityInput, postalInput); //Uses ShippingService to calculate shipping cost based on the order's city and postal code
             }
             
             order.GrandTotal = order.Subtotal + order.ShippingFee + order.CacheUpgradeFee;
@@ -82,7 +85,7 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
             if (ModelState.IsValid)
             {
                 //temporarily save the calculated order details inso session
-                var orderJson = System.Text.Json.JsonSerializer.Serialize(order);
+                var orderJson = JsonSerializer.Serialize(order);
                 HttpContext.Session.SetString("PendingCheckoutOrder", orderJson);
 
                 //redirect the user straight to the new payment screen
@@ -106,7 +109,29 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
             }
 
             // 3. Unpack the JSON back into an actual "Order" object that C# understands
-            var order = System.Text.Json.JsonSerializer.Deserialize<Order>(pendingJson);
+            var order = JsonSerializer.Deserialize<Order>(pendingJson);
+            if (order == null) return RedirectToAction("Index");
+
+            //Initialize Stripe Payment Intent
+            StripeConfiguration.ApiKey = "sk_test_YOUR_STRIPE_SECRET_KEY";
+
+            var options = new PaymentIntentCreateOptions
+            {
+                Amount = (long)(order.GrandTotal * 100),
+                Currency = "usd",
+                AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
+                {
+                    Enabled = true,
+                },
+                ReceiptEmail = order.CustomerEmail
+            };
+
+            var service = new PaymentIntentService();
+            PaymentIntent intent = service.Create(options);
+
+            //send clientsecret & publishahle to view view viewbag for stripes elements JS
+            ViewBag.ClientSecret = intent.ClientSecret;
+            ViewBag.StripePublishableKey = "pk_test_YOUR_STRIPE_PUBLISHABLE_KEY";
 
             // 4. Send that unpacked order data to your new Payment webpage view
             return View(order);
@@ -115,7 +140,7 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
         // POST: /Checkout/ProcessSecurePayment
 [HttpPost]
 [ValidateAntiForgeryToken]
-public async Task<IActionResult> ProcessSecurePayment()
+public async Task<IActionResult> ProcessSecurePayment(string paymentIntentId)
 {
     // 1. Grab that same temporary order package out of session memory again
     var pendingJson = HttpContext.Session.GetString("PendingCheckoutOrder");
@@ -124,25 +149,34 @@ public async Task<IActionResult> ProcessSecurePayment()
         return RedirectToAction("Index");
     }
 
-    var order = System.Text.Json.JsonSerializer.Deserialize<Order>(pendingJson);
-
+    var order = JsonSerializer.Deserialize<Order>(pendingJson);
     if (order == null)
-            {
-                ModelState.AddModelError("", "We ran into an issue retrieving your order details. Please try again.");
-                return RedirectToAction("Index");
-            }
+    {
+        ModelState.AddModelError("", "We ran into an issue retrieving your order details. Please try again.");
+        return RedirectToAction("Index");
+    }
 
-    // 2. Fetch their actual shopping basket items so we know what they are buying
-    var basket = GetBasketFromSession();
+    //verify payment with stripe
+    StripeConfiguration.ApiKey = "sk_test_YOUR_STRIPE_SECRET_KEY";
+    var intentService = new PaymentIntentService();
+    PaymentIntent intent = await intentService.GetAsync(paymentIntentId);
 
-    // 3. PAYMENT GATEWAY PLACEHOLDER
-    // In a live production app, this is where you would connect to Stripe or PayPal API.
-    // If the card is declined, you would return an error here. We will assume success!
+    if (intent.Status != "succeeded")
+    {
+        ModelState.AddModelError("", "Payment verification failed. Please try again.");
+        return View("PaymentSummary", order);
+    }
 
-    // 4. NOW it is safe to add the order record to your SQLite context
+    //Record paid details onto order object
+    order.AmountPaid = (decimal)(intent.Amount / 100.0);
+    order.PaymentStatus = "Paid";
+    order.StripePaymentIntentId = paymentIntentId;
+
+    //save order in SQLite
     _context.Orders.Add(order);
 
-    // 5. Loop through their shopping basket to safely reduce warehouse stock levels
+    //Deduct inventory stock
+    var basket = GetBasketFromSession();
     if (basket != null)
     {
         foreach (var item in basket)
@@ -151,7 +185,7 @@ public async Task<IActionResult> ProcessSecurePayment()
             var product = await _context.Products.FindAsync(item.Key);
             if (product != null)
             {
-                // Math.Max guarantees stock never accidentally drops below zero
+                // Math.Max guarantees stock never accidentally drops below zero+
                 product.StockQuantity = Math.Max(0, product.StockQuantity - item.Value);
             }
         }

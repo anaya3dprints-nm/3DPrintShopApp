@@ -38,6 +38,11 @@ namespace ThreeDPrintStore.Models //declares namespace
 
         //Stores the date the order was created
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
+
+        //payment details
+        public decimal AmountPaid { get; set; }
+        public string? PaymentStatus { get; set; }
+        public string? StripePaymentIntentId { get; set; }
         
     }
 }
