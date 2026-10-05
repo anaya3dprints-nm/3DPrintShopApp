@@ -93,6 +93,466 @@
     "date": "2026-10-04T00:00:00",
     "name": "National Cinnamon Bun Day",
     "image": "/images/national/cinnabon.jpg"
-  }   
+  },
+  {
+    "date": "2026-10-05T00:00:00",
+    "name": "National Get Funky Day",
+    "image": "/images/national/disco.jpg"
+  },   
+  {
+    "date": "2026-10-06T00:00:00",
+    "name": "Mad Hatter Day",
+    "image": "/images/national/madhatter.jpg"
+  },
+  {
+    "date": "2026-10-07T00:00:00",
+    "name": "National Frappe Day",
+    "image": "/images/national/frappe.jpg"
+  },
+  {
+    "date": "2026-10-08T00:00:00",
+    "name": "World Octopus Day",
+    "image": "/images/national/octopus.jpg"
+  },
+  {
+    "date": "2026-10-09T00:00:00",
+    "name": "World Egg Day",
+    "image": "/images/national/egg.jpg"
+  },
+  {
+    "date": "2026-10-10T00:00:00",
+    "name": "National Motorcycle Day",
+    "image": "/images/national/motorcycle.jpg"
+  },
+  {
+    "date": "2026-10-10T00:00:00",
+    "name": "National Handbag Day",
+    "image": "/images/national/handbag.jpg"
+  },   
+  {
+    "date": "2026-10-11T00:00:00",
+    "name": "National Sausage Pizza Day",
+    "image": "/images/national/sausagepizza.jpg"
+  },
+  {
+    "date": "2026-10-12T00:00:00",
+    "name": "Harry Potter Book Day",
+    "image": "/images/national/harrypotter.jpg"
+  },
+  {
+    "date": "2026-10-13T00:00:00",
+    "name": "National M&M Day",
+    "image": "/images/national/M&M.jpg"
+  },
+  {
+    "date": "2026-10-14T00:00:00",
+    "name": "International Top Spinning Day",
+    "image": "/images/national/spinningtop.jpg"
+  },
+  {
+    "date": "2026-10-15T00:00:00",
+    "name": "National Grouch Day",
+    "image": "/images/national/grouch.jpg"
+  },
+  {
+    "date": "2026-10-16T00:00:00",
+    "name": "National Mammography Day",
+    "image": "/images/national/mammography.jpg"
+  },
+  {
+    "date": "2026-10-17T00:00:00",
+    "name": "International Sloth Day",
+    "image": "/images/national/sloth.jpg"
+  },
+  {
+    "date": "2026-10-18T00:00:00",
+    "name": "National Chocolate Cupcake Day",
+    "image": "/images/national/chocolatecupcake.jpg"
+  },
+  {
+    "date": "2026-10-19T00:00:00",
+    "name": "National New Friends Day",
+    "image": "/images/national/friends.jpg"
+  },
+  {
+    "date": "2026-10-20T00:00:00",
+    "name": "Pharmacy Technician Day",
+    "image": "/images/national/pharmtech.jpg"
+  },
+  {
+    "date": "2026-10-21T00:00:00",
+    "name": "National Reptile Day",
+    "image": "/images/national/reptile.jpg"
+  },
+  {
+    "date": "2026-10-22T00:00:00",
+    "name": "National Nut Day",
+    "image": "/images/national/nut.jpg"
+  },
+  {
+    "date": "2026-10-23T00:00:00",
+    "name": "National Croc Day",
+    "image": "/images/national/croc.jpg"
+  },
+  {
+    "date": "2026-10-24T00:00:00",
+    "name": "National Kangaroo Awareness Day",
+    "image": "/images/national/kangaroo.jpg"
+  },
+  {
+    "date": "2026-10-25T00:00:00",
+    "name": "National Chucky Day",
+    "image": "/images/national/chucky.jpg"
+  },
+  {
+    "date": "2026-10-26T00:00:00",
+    "name": "National Pumpkin Day",
+    "image": "/images/national/pumpkin.jpg"
+  },
+  {
+    "date": "2026-10-27T00:00:00",
+    "name": "National American Beer Day",
+    "image": "/images/national/americabeer.jpg"
+  },
+  {
+    "date": "2026-10-28T00:00:00",
+    "name": "National Chocolate Day",
+    "image": "/images/national/chocolate.jpg"
+  },
+  {
+    "date": "2026-10-29T00:00:00",
+    "name": "National Cat Day",
+    "image": "/images/national/cat.jpg"
+  },
+  {
+    "date": "2026-10-30T00:00:00",
+    "name": "National Candy Corn Day",
+    "image": "/images/national/candycorn.jpg"
+  },
+  {
+    "date": "2026-10-31T00:00:00",
+    "name": "National Pitbull Awareness Day",
+    "image": "/images/national/pitbull.jpg"
+  },
+  {
+    "date": "2026-11-01T00:00:00",
+    "name": "All Saints Day",
+    "image": "/images/national/saints.jpg"
+  },
+  {
+    "date": "2026-11-02T00:00:00",
+    "name": "Day of the Dead",
+    "image": "/images/national/dayofdead.jpg"
+  },
+  {
+    "date": "2026-11-03T00:00:00",
+    "name": "Jellyfish Day",
+    "image": "/images/national/jellyfish.jpg"
+  },
+  {
+    "date": "2026-11-04T00:00:00",
+    "name": "National Candy Day",
+    "image": "/images/national/candy.jpg"
+  },
+  {
+    "date": "2026-11-05T00:00:00",
+    "name": "American Football Day",
+    "image": "/images/national/football.jpg"
+  },
+  {
+    "date": "2026-11-06T00:00:00",
+    "name": "National Basketball Day",
+    "image": "/images/national/basketball.jpg"
+  },
+  {
+    "date": "2026-11-07T00:00:00",
+    "name": "National Bison Day",
+    "image": "/images/national/bison.jpg"
+  },
+  {
+    "date": "2026-11-08T00:00:00",
+    "name": "National National Dunce Day",
+    "image": "/images/national/dunce.jpg"
+  },
+  {
+    "date": "2026-11-09T00:00:00",
+    "name": "Geriatric Tooth Fairy Day",
+    "image": "/images/national/toothfairy.jpg"
+  },
+  {
+    "date": "2026-11-10T00:00:00",
+    "name": "Sesame Street Day",
+    "image": "/images/national/sesamestreet.jpg"
+  },
+  {
+    "date": "2026-11-11T00:00:00",
+    "name": "Veterans Day",
+    "image": "/images/national/veterans.jpg"
+  },
+  {
+    "date": "2026-11-12T00:00:00",
+    "name": "American Fancy Rat & Mouse Day",
+    "image": "/images/national/rat&mouse.jpg"
+  },
+  {
+    "date": "2026-11-13T00:00:00",
+    "name": "National Jersey Day",
+    "image": "/images/national/jersey.jpg"
+  },
+  {
+    "date": "2026-11-14T00:00:00",
+    "name": "National Pickle Day",
+    "image": "/images/national/pickel.jpg"
+  },
+  {
+    "date": "2026-11-15T00:00:00",
+    "name": "National Recycling Day",
+    "image": "/images/national/recycling.jpg"
+  },
+  {
+    "date": "2026-11-16T00:00:00",
+    "name": "National Fast Food Day",
+    "image": "/images/national/fastfood.jpg"
+  },
+  {
+    "date": "2026-11-17T00:00:00",
+    "name": "National Homemade Bread Day",
+    "image": "/images/national/bread.jpg"
+  },
+  {
+    "date": "2026-11-18T00:00:00",
+    "name": "Mickey Mouse Day",
+    "image": "/images/national/mickeymouse.jpg"
+  },
+  {
+    "date": "2026-11-19T00:00:00",
+    "name": "World Toilet Day",
+    "image": "/images/national/toilet.jpg"
+  },
+  {
+    "date": "2026-11-20T00:00:00",
+    "name": "Name Your PC Day",
+    "image": "/images/national/pc.jpg"
+  },
+  {
+    "date": "2026-11-21T00:00:00",
+    "name": "Red Mitten Day",
+    "image": "/images/national/redmitten.jpg"
+  },
+  {
+    "date": "2026-11-22T00:00:00",
+    "name": "Go For A Ride Day",
+    "image": "/images/national/goforride.jpg"
+  },
+  {
+    "date": "2026-11-23T00:00:00",
+    "name": "Fibonacci Day,
+    "image": "/images/national/fibonacci.jpg"
+  },
+  {
+    "date": "2026-11-24T00:00:00",
+    "name": "D.B. Cooper Day",
+    "image": "/images/national/dbcooper.jpg"
+  },
+  {
+    "date": "2026-11-25T00:00:00",
+    "name": "National Jukebox Day",
+    "image": "/images/national/jukebox.jpg"
+  },
+  {
+    "date": "2026-11-26T00:00:00",
+    "name": "Thanksgiving",
+    "image": "/images/national/thanksgiving.jpg"
+  },
+  {
+    "date": "2026-11-27T00:00:00",
+    "name": "Turtle Adoption Day",
+    "image": "/images/national/turtle.jpg"
+  },
+  {
+    "date": "2026-11-27T00:00:00",
+    "name": "National Day of Listening",
+    "image": "/images/national/listening.jpg"
+  },
+  {
+    "date": "2026-11-28T00:00:00",
+    "name": "National French Toast Day",
+    "image": "/images/national/frenchtoast.jpg"
+  },
+  {
+    "date": "2026-11-29T00:00:00",
+    "name": "Chadwick Boseman Day",
+    "image": "/images/national/blackpanther.jpg"
+  },
+  {
+    "date": "2026-11-30T00:00:00",
+    "name": "National Computer Security Day",
+    "image": "/images/national/computer.jpg"
+  },
+  {
+    "date": "2026-12-01T00:00:00",
+    "name": "Eat a Red Apple Day",
+    "image": "/images/national/redapple.jpg"
+  },
+  {
+    "date": "2026-12-01T00:00:00",
+    "name": "National Cookie Cutter Day",
+    "image": "/images/national/cookiecutter.jpg"
+  },
+  {
+    "date": "2026-12-02T00:00:00",
+    "name": "National Computer Literacy Day",
+    "image": "/images/national/computer.jpg"
+  },
+  {
+    "date": "2026-12-03T00:00:00",
+    "name": "Let's Hug Day",
+    "image": "/images/national/hugs.jpg"
+  },
+  {
+    "date": "2026-12-04T00:00:00",
+    "name": "National Dice Day",
+    "image": "/images/national/dice.jpg"
+  },
+  {
+    "date": "2026-12-05T00:00:00",
+    "name": "International Ninja Day",
+    "image": "/images/national/ninja.jpg"
+  },
+  {
+    "date": "2026-12-06T00:00:00",
+    "name": "Candle Day",
+    "image": "/images/national/candle.jpg"
+  },
+  {
+    "date": "2026-12-07T00:00:00",
+    "name": "National Cotton Candy Day",
+    "image": "/images/national/cottoncandy.jpg"
+  },
+  {
+    "date": "2026-12-08T00:00:00",
+    "name": "National Brownie Day",
+    "image": "/images/national/brownie.jpg"
+  },
+  {
+    "date": "2026-12-09T00:00:00",
+    "name": "National Llama Day",
+    "image": "/images/national/llama.jpg"
+  },
+  {
+    "date": "2026-12-10T00:00:00",
+    "name": "Nobel Prize Day",
+    "image": "/images/national/nobelprize.jpg"
+  },
+  {
+    "date": "2026-12-11T00:00:00",
+    "name": "Holiday Food Drive for Needy Animals Day",
+    "image": "/images/national/needyanimals.jpg"
+  },
+  {
+    "date": "2026-12-12T00:00:00",
+    "name": "Gingerbread House Day",
+    "image": "/images/national/gingerbreadhouse.jpg"
+  },
+  {
+    "date": "2026-12-13T00:00:00",
+    "name": "National Horse Day",
+    "image": "/images/national/horse.jpg"
+  },
+  {
+    "date": "2026-12-14T00:00:00",
+    "name": "Monkey Day",
+    "image": "/images/national/monkey.jpg"
+  },
+  {
+    "date": "2026-12-15T00:00:00",
+    "name": "National Cupcake Day",
+    "image": "/images/national/cupcake.jpg"
+  },
+  {
+    "date": "2026-12-16T00:00:00",
+    "name": "Stupid Toy Day",
+    "image": "/images/national/stupidtoy.jpg"
+  },
+  {
+    "date": "2026-12-17T00:00:00",
+    "name": "National Maple Syrup Day",
+    "image": "/images/national/maplesyrup.jpg"
+  },
+  {
+    "date": "2026-12-18T00:00:00",
+    "name": "Bake Cookies Day",
+    "image": "/images/national/cookies.jpg"
+  },
+  {
+    "date": "2026-12-19T00:00:00",
+    "name": "National Emo Day",
+    "image": "/images/national/emo.jpg"
+  },
+  {
+    "date": "2026-12-20T00:00:00",
+    "name": "Games Day",
+    "image": "/images/national/games.jpg"
+  },
+  {
+    "date": "2026-12-21T00:00:00",
+    "name": "World Snowboard Day",
+    "image": "/images/national/snowboard.jpg"
+  },
+  {
+    "date": "2026-12-22T00:00:00",
+    "name": "National Cookie Exchange Day",
+    "image": "/images/national/cookie.jpg"
+  },
+  {
+    "date": "2026-12-23T00:00:00",
+    "name": "National Christmas Movie Marathon",
+    "image": "/images/national/xmasstory.jpg"
+  },
+  {
+    "date": "2026-12-24T00:00:00",
+    "name": "National Eggnog Day",
+    "image": "/images/national/eggnog.jpg"
+  },
+  {
+    "date": "2026-12-25T00:00:00",
+    "name": "Jesus' Birthday",
+    "image": "/images/national/jesus.jpg"
+  },
+  {
+    "date": "2026-12-26T00:00:00",
+    "name": "National Candy Cane Day",
+    "image": "/images/national/candycane.jpg"
+  },
+  {
+    "date": "2026-12-27T00:00:00",
+    "name": "Visit the Zoo Day",
+    "image": "/images/national/zoo.jpg"
+  },
+  {
+    "date": "2026-12-28T00:00:00",
+    "name": "Pledge of Allegiance Day",
+    "image": "/images/national/americaflag.jpg"
+  },
+  {
+    "date": "2026-12-29T00:00:00",
+    "name": "International Cello Day",
+    "image": "/images/national/cello.jpg"
+  },
+  {
+    "date": "2026-12-30T00:00:00",
+    "name": "National Bacon Day",
+    "image": "/images/national/bacon.jpg"
+  },
+  {
+    "date": "2026-12-31T00:00:00",
+    "name": "National Champagne Day",
+    "image": "/images/national/cinnabon.jpg"
+  },
+  {
+    "date": "2027-01-01T00:00:00",
+    "name": "Ring a Bell Day",
+    "image": "/images/national/bell.jpg"
+  }
     
   ]
