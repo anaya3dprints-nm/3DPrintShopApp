@@ -113,7 +113,7 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
             if (order == null) return RedirectToAction("Index");
 
             //Initialize Stripe Payment Intent
-            StripeConfiguration.ApiKey = "sk_test_YOUR_STRIPE_SECRET_KEY";
+            StripeConfiguration.ApiKey = "YOUR_STRIPE_SECRET_KEY_HERE";
 
             var options = new PaymentIntentCreateOptions
             {
@@ -131,7 +131,7 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
 
             //send clientsecret & publishahle to view view viewbag for stripes elements JS
             ViewBag.ClientSecret = intent.ClientSecret;
-            ViewBag.StripePublishableKey = "pk_test_YOUR_STRIPE_PUBLISHABLE_KEY";
+            ViewBag.StripePublishableKey = "pk_live_51TJJNDIyGFfPiJJjCZBndMbpPZhXNgE7OaO7yh2rzLhfWXx6S7CA1DIN4vQsWzymVabwubHG3lQiTyPXQDAeCDV400UGy57KVk";
 
             // 4. Send that unpacked order data to your new Payment webpage view
             return View(order);
@@ -157,7 +157,7 @@ public async Task<IActionResult> ProcessSecurePayment(string paymentIntentId)
     }
 
     //verify payment with stripe
-    StripeConfiguration.ApiKey = "sk_test_YOUR_STRIPE_SECRET_KEY";
+    StripeConfiguration.ApiKey = "YOUR_STRIPE_SECRET_KEY_HERE";
     var intentService = new PaymentIntentService();
     PaymentIntent intent = await intentService.GetAsync(paymentIntentId);
 
