@@ -113,7 +113,7 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
             if (order == null) return RedirectToAction("Index");
 
             //Initialize Stripe Payment Intent
-            StripeConfiguration.ApiKey = "YOUR_STRIPE_SECRET_KEY_HERE";
+            StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
 
             var options = new PaymentIntentCreateOptions
             {
@@ -157,7 +157,7 @@ public async Task<IActionResult> ProcessSecurePayment(string paymentIntentId)
     }
 
     //verify payment with stripe
-    StripeConfiguration.ApiKey = "YOUR_STRIPE_SECRET_KEY_HERE";
+    StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
     var intentService = new PaymentIntentService();
     PaymentIntent intent = await intentService.GetAsync(paymentIntentId);
 
