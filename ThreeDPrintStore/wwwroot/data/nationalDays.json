@@ -157,7 +157,7 @@
   {
     "date": "2026-10-16T00:00:00",
     "name": "National Mammography Day",
-    "image": "/images/national/mammography.jpg"
+    "image": "/images/national/mammography.png"
   },
   {
     "date": "2026-10-17T00:00:00",
@@ -337,7 +337,7 @@
   {
     "date": "2026-11-21T00:00:00",
     "name": "Red Mitten Day",
-    "image": "/images/national/redmitten.jpg"
+    "image": "/images/national/redmitten.png"
   },
   {
     "date": "2026-11-22T00:00:00",
@@ -346,8 +346,8 @@
   },
   {
     "date": "2026-11-23T00:00:00",
-    "name": "Fibonacci Day,
-    "image": "/images/national/fibonacci.jpg"
+    "name": "Fibonacci Day",
+    "image": "/images/national/fibonacci.png"
   },
   {
     "date": "2026-11-24T00:00:00",
@@ -372,7 +372,7 @@
   {
     "date": "2026-11-27T00:00:00",
     "name": "National Day of Listening",
-    "image": "/images/national/listening.jpg"
+    "image": "/images/national/listening.png"
   },
   {
     "date": "2026-11-28T00:00:00",
@@ -402,7 +402,7 @@
   {
     "date": "2026-12-02T00:00:00",
     "name": "National Computer Literacy Day",
-    "image": "/images/national/computer.jpg"
+    "image": "/images/national/computerliteracy.jpg"
   },
   {
     "date": "2026-12-03T00:00:00",
@@ -502,7 +502,7 @@
   {
     "date": "2026-12-22T00:00:00",
     "name": "National Cookie Exchange Day",
-    "image": "/images/national/cookie.jpg"
+    "image": "/images/national/cookieexchange.jpg"
   },
   {
     "date": "2026-12-23T00:00:00",
@@ -547,7 +547,7 @@
   {
     "date": "2026-12-31T00:00:00",
     "name": "National Champagne Day",
-    "image": "/images/national/cinnabon.jpg"
+    "image": "/images/national/champagne.jpg"
   },
   {
     "date": "2027-01-01T00:00:00",
