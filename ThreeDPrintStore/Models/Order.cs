@@ -12,7 +12,7 @@ namespace ThreeDPrintStore.Models //declares namespace
 
         [Required(ErrorMessage = "Email is required")] //email must be provided
         [EmailAddress(ErrorMessage = "Invalid email address")] //additional validation
-        public string CustomerEmail { get; set; } = string.Empty; //stores the customer's email address
+        public string EmailAddress { get; set; } = string.Empty; //stores the customer's email address
 
         [Required(ErrorMessage = "Street address is required")] //required field
         public string StreetAddress { get; set; } = string.Empty; //stores the order's street address

@@ -1,275 +1,237 @@
-using Microsoft.AspNetCore.Mvc; //Allows your class to function as an MVC controller
-using System.Text.Json; //Provides JSON serialization and deserialization functionality.
-using ThreeDPrintStore.Models; //Gives access to model classes in your project.
-using ThreeDPrintStore.Services; //Gives access to service classes (like your shipping service).
+using Microsoft.AspNetCore.Mvc;
 using Stripe;
-using Microsoft.Extensions.Configuration;
+using Stripe.Checkout;
+using ThreeDPrintStore.Models;
 
-namespace ThreeDPrintStore.Controllers //Defines what namespace this controller belongs too
+namespace ThreeDPrintStore.Controllers
 {
-    //class and private fields
-    public class CheckoutController : Controller //creates CheckoutController, inheriting from MVC controller.
+    public class CheckoutController : Controller
     {
-        private readonly StoreDbContext _context; //My db context, lets me query and save data
-        private readonly ShippingService _shippingService; //service responsible for shipping calculations
-        private const string BasketSessionKey = "UserShoppingBasket"; //The session key you use to store/retrieve the user's basket.
+        private readonly StoreDbContext _context;
         private readonly IConfiguration _configuration;
+        private const string BasketSessionKey = "UserShoppingBasket";
 
-        //responsible for injecting dependencies into the controller
-        /**
-            -_context = context - saves the injected db context into private field
-            -_shippingService - saves the injected shipping service
-        **/
-        public CheckoutController(StoreDbContext context, ShippingService shippingService, IConfiguration configuration)
+        public CheckoutController(StoreDbContext context, IConfiguration configuration)
         {
-            _configuration = configuration;
             _context = context;
-            _shippingService = shippingService;
+            _configuration = configuration;
         }
 
         // 1. GET: /Checkout
         [HttpGet]
-        public IActionResult Index() //controller action that returns the checkout view
+        public IActionResult Index()
         {
-            var basket = GetBasketFromSession(); //retrieves the user's shopping basket from session storage
-            if (!basket.Any()) return RedirectToAction("Index", "Home"); //if the basket is empty, redirect user back to home
+            var basket = GetBasketFromSession();
+            if (!basket.Any()) return RedirectToAction("Index", "Home");
 
-            decimal subtotal = CalculateBasketSubtotal(basket); //calculates the subtotal price of all items in the basket
-
-            // Pass a prepared model with item parameters pre-filled
-            var orderTemplate = new Order { Subtotal = subtotal }; //creates a new Order object pre-filled with the subtotal
-            return View(orderTemplate); //returns the checkout view, populated with the order template
+            return View(basket);
         }
 
-        // 2. POST: /Checkout/PlaceOrder
-        [HttpPost] //marks this controller action as responding to HTTP POST requests. Called when user submits form
-        public IActionResult PlaceOrder(Order order) //defines asynchronous action method named PlaceOrder that receives an order onject from submitted form
-        {
-            var basket = GetBasketFromSession(); //retrieves the user's shopping basket from session memory
-            if (basket == null || !basket.Any())
-            {
-                ModelState.AddModelError("", "Your shopping cart session has expired.");
-                return View("Index", order);
-            }
-
-            order.Subtotal = CalculateBasketSubtotal(basket); //calculates the subtotal cost of all items and assigns it to the order's Subtotal property
-
-            //format and check the incoming city string
-            string cityInput = order.City ?? "";
-            string postalInput = order.PostalCode ?? "";
-            string sanitizedCity = cityInput.Trim().ToLower();
-            bool isAlbuquerque = sanitizedCity == "albuquerque" || sanitizedCity == "abq";
-
-            //process according to their selected deliverytype and choice
-            if (order.DeliveryType == "PremiumCacheDrop" && isAlbuquerque)
-            {
-                order.ShippingFee = 0.00m;
-                order.CacheUpgradeFee = 10.00m;
-            }
-            else if (order.DeliveryType == "FreeDelivery" && isAlbuquerque)
-            {
-                order.ShippingFee = 0.00m;
-                order.CacheUpgradeFee = 0.00m;
-                order.SponsoredCommunityModelId = null;
-            }
-            else
-            {
-                //out of towners or safety fallback
-                order.DeliveryType = "Shipping";
-                order.CacheUpgradeFee = 0.00m;
-                order.SponsoredCommunityModelId = null;
-                
-                // Execute the Shipping Matrix Engine matching against Albuquerque limits
-                order.ShippingFee = _shippingService.CalculateShipping(cityInput, postalInput); //Uses ShippingService to calculate shipping cost based on the order's city and postal code
-            }
-            
-            order.GrandTotal = order.Subtotal + order.ShippingFee + order.CacheUpgradeFee;
-            //checks whether the posted form data passed validation rules
-            if (ModelState.IsValid)
-            {
-                //temporarily save the calculated order details inso session
-                var orderJson = JsonSerializer.Serialize(order);
-                HttpContext.Session.SetString("PendingCheckoutOrder", orderJson);
-
-                //redirect the user straight to the new payment screen
-                return RedirectToAction("PaymentSummary");
-            }
-
-            return View("Index", order); //If ModelState was not valid earlier, reload the Index view and show validation errors
-        }
-
-        // GET: /Checkout/PaymentSummary
-        [HttpGet]
-        public IActionResult PaymentSummary()
-        {
-            // 1. Pull the temporary data package out of the user's session memory
-            var pendingJson = HttpContext.Session.GetString("PendingCheckoutOrder");
-
-            // 2. Safety Check: If the package is empty (like if someone typed the URL manually), send them back
-            if (string.IsNullOrEmpty(pendingJson))
-            {
-                return RedirectToAction("Index");
-            }
-
-            // 3. Unpack the JSON back into an actual "Order" object that C# understands
-            var order = JsonSerializer.Deserialize<Order>(pendingJson);
-            if (order == null) return RedirectToAction("Index");
-
-            //Initialize Stripe Payment Intent
-            StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
-
-            var options = new PaymentIntentCreateOptions
-            {
-                Amount = (long)(order.GrandTotal * 100),
-                Currency = "usd",
-                AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
-                {
-                    Enabled = true,
-                },
-                ReceiptEmail = order.CustomerEmail
-            };
-
-            var service = new PaymentIntentService();
-            PaymentIntent intent = service.Create(options);
-
-            //send clientsecret & publishahle to view view viewbag for stripes elements JS
-            ViewBag.ClientSecret = intent.ClientSecret;
-            ViewBag.StripePublishableKey = "pk_live_51TJJNDIyGFfPiJJjCZBndMbpPZhXNgE7OaO7yh2rzLhfWXx6S7CA1DIN4vQsWzymVabwubHG3lQiTyPXQDAeCDV400UGy57KVk";
-
-            // 4. Send that unpacked order data to your new Payment webpage view
-            return View(order);
-        }
-
-        // POST: /Checkout/ProcessSecurePayment
+        // 2. POST: /Checkout/CreateCheckoutSession
 [HttpPost]
-[ValidateAntiForgeryToken]
-public IActionResult ProcessSecurePayment()
+public IActionResult CreateCheckoutSession()
 {
-    // 1. Grab that same temporary order package out of session memory again
-    var pendingJson = HttpContext.Session.GetString("PendingCheckoutOrder");
-    if (string.IsNullOrEmpty(pendingJson))
-    {
-        return RedirectToAction("Index");
-    }
+    var basket = GetBasketFromSession();
+    if (!basket.Any()) return RedirectToAction("Index", "Home");
 
-    var order = JsonSerializer.Deserialize<Order>(pendingJson);
-    if (order == null)
-    {
-        ModelState.AddModelError("", "We ran into an issue retrieving your order details. Please try again.");
-        return RedirectToAction("Index");
-    }
+    StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"] ?? "sk_test_YOUR_KEY";
 
-    //verify payment with stripe
-    StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
-    var domain = $"{Request.Scheme}://{Request.Host}";
+    var lineItems = new List<SessionLineItemOptions>();
 
-    // 3. Create Stripe Hosted Checkout Session
-    var options = new SessionCreateOptions
+    foreach (var item in basket)
     {
-        PaymentMethodTypes = new List<string> { "card" },
-        LineItems = new List<SessionLineItemOptions>
+        var product = _context.Products.Find(item.Key);
+        if (product != null)
         {
-            new SessionLineItemOptions
+            lineItems.Add(new SessionLineItemOptions
             {
                 PriceData = new SessionLineItemPriceDataOptions
                 {
-                    UnitAmount = (long)(order.GrandTotal * 100), // convert to cents
+                    UnitAmount = (long)(product.Price * 100),
                     Currency = "usd",
                     ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
-                        Name = "3D Print Order",
+                        Name = product.Name ?? "Product",
+                        Description = product.Description
                     },
                 },
-                Quantity = 1,
-            },
-        },
+                Quantity = item.Value,
+            });
+        }
+    }
+
+    var domain = $"{Request.Scheme}://{Request.Host}";
+
+    var options = new SessionCreateOptions
+    {
+        // PaymentMethodTypes removed - Stripe handles card payments automatically!
+        LineItems = lineItems,
         Mode = "payment",
-        SuccessUrl = $"{domain}/Checkout/Success",
-        CancelUrl = $"{domain}/Checkout/Cancel",
+        ShippingAddressCollection = new SessionShippingAddressCollectionOptions
+        {
+            AllowedCountries = new List<string> { "US" },
+        },
+        ShippingOptions = new List<SessionShippingOptionOptions>
+        {
+            new SessionShippingOptionOptions
+            {
+                ShippingRateData = new SessionShippingOptionShippingRateDataOptions
+                {
+                    Type = "fixed_amount",
+                    FixedAmount = new SessionShippingOptionShippingRateDataFixedAmountOptions { Amount = 500, Currency = "usd" },
+                    DisplayName = "Standard Mail Shipping",
+                    DeliveryEstimate = new SessionShippingOptionShippingRateDataDeliveryEstimateOptions
+                    {
+                        Minimum = new SessionShippingOptionShippingRateDataDeliveryEstimateMinimumOptions { Unit = "business_day", Value = 3 },
+                        Maximum = new SessionShippingOptionShippingRateDataDeliveryEstimateMaximumOptions { Unit = "business_day", Value = 5 },
+                    }
+                }
+            },
+            new SessionShippingOptionOptions
+            {
+                ShippingRateData = new SessionShippingOptionShippingRateDataOptions
+                {
+                    Type = "fixed_amount",
+                    FixedAmount = new SessionShippingOptionShippingRateDataFixedAmountOptions { Amount = 0, Currency = "usd" },
+                    DisplayName = "Free Local Delivery (ABQ Exclusive)",
+                }
+            },
+            new SessionShippingOptionOptions
+            {
+                ShippingRateData = new SessionShippingOptionShippingRateDataOptions
+                {
+                    Type = "fixed_amount",
+                    FixedAmount = new SessionShippingOptionShippingRateDataFixedAmountOptions { Amount = 1000, Currency = "usd" },
+                    DisplayName = "Premium Cache Drop Scavenger Hunt",
+                }
+            }     
+        },
+    ExtraParams = new Dictionary<string, object>
+    {
+        {
+            "custom_fields", new[]
+            {
+                new Dictionary<string, object>
+                {
+                    { "key", "sponsored_community_model" },
+                    {
+                        "label", new Dictionary<string, object>
+                        {
+                            { "type", "custom" },
+                            { "custom", "Sponsored Community Model (Optional)" }
+                        }
+                    },
+                    { "type", "text" },
+                    { "optional", true }
+                },
+                new Dictionary<string, object>
+                {
+                    { "key", "delivery_instructions" },
+                    {
+                        "label", new Dictionary<string, object>
+                        {
+                            { "type", "custom" },
+                            { "custom", "Delivery or Cache Drop Instructions" }
+                        }
+                    },
+                    { "type", "text" },
+                    { "optional", true }
+                }
+            }
+        }
+        
+        },
+
+        CustomText = new SessionCustomTextOptions
+        {
+            ShippingAddress = new SessionCustomTextShippingAddressOptions
+            {
+                Message = "Free local delivery is available exclusively for Albuquerque (ABQ) addresses."
+            },
+            Submit = new SessionCustomTextSubmitOptions
+            {
+                Message = "Thank you for supporting 3D printing in the local community!"
+            }
+        },
+
+
+        SuccessUrl = $"{domain}/Checkout/Confirmation?session_id={{CHECKOUT_SESSION_ID}}",
+        CancelUrl = $"{domain}/Checkout/Index",
     };
 
     var service = new SessionService();
     Session session = service.Create(options);
 
-    // 4. Redirect user to Stripe's hosted payment page
     return Redirect(session.Url);
 }
-    
 
-    //Record paid details onto order object
-    order.AmountPaid = (decimal)(intent.Amount / 100.0);
-    order.PaymentStatus = "Paid";
-    order.StripePaymentIntentId = paymentIntentId;
+// 3. GET: /Checkout/Confirmation?session_id=cs_test_...
+[HttpGet]
+public async Task<IActionResult> Confirmation(string session_id)
+{
+    if (string.IsNullOrEmpty(session_id)) return RedirectToAction("Index", "Home");
 
-    //save order in SQLite
-    _context.Orders.Add(order);
+    StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"] ?? "sk_test_YOUR_KEY";
+    var service = new SessionService();
+    Session session = await service.GetAsync(session_id);
 
-    //Deduct inventory stock
-    var basket = GetBasketFromSession();
-    if (basket != null)
+    if (session.PaymentStatus == "paid")
     {
+        // Extract the user's typed response from Stripe's custom text field
+        string sponsoredModelText = session.CustomFields
+            ?.FirstOrDefault(f => f.Key == "sponsored_community_model")
+            ?.Text?.Value ?? "";
+
+        string deliveryInstructions = session.CustomFields
+            ?.FirstOrDefault(f => f.Key == "delivery_instructions")
+            ?.Text?.Value ?? "";
+
+        // Parse integer ID if numeric, otherwise store null
+        int? communityModelId = int.TryParse(sponsoredModelText, out int parsedId) ? parsedId : null;
+
+
+        var order = new Order
+        {
+            EmailAddress = session.CustomerDetails?.Email ?? session.CustomerEmail ?? "",
+            AmountPaid = (decimal)((session.AmountTotal ?? 0) / 100.0),
+            PaymentStatus = "Paid",
+            StripePaymentIntentId = session.PaymentIntentId ?? session.Id,
+            City = session.CustomerDetails?.Address?.City ?? "",
+            PostalCode = session.CustomerDetails?.Address?.PostalCode ?? "",
+            SponsoredCommunityModelId = communityModelId
+        };
+
+        _context.Orders.Add(order);
+
+        var basket = GetBasketFromSession();
         foreach (var item in basket)
         {
-            // item.Key is the Product ID, item.Value is the Quantity they bought
             var product = await _context.Products.FindAsync(item.Key);
             if (product != null)
             {
-                // Math.Max guarantees stock never accidentally drops below zero+
                 product.StockQuantity = Math.Max(0, product.StockQuantity - item.Value);
             }
         }
+
+        await _context.SaveChangesAsync();
+
+        HttpContext.Session.Remove(BasketSessionKey);
+
+        return View(order);
     }
 
-    // 6. Push all changes (the new order record + updated stock levels) to your database at once!
-    await _context.SaveChangesAsync();
-
-    // 7. Clean up! Wipe out their temporary checkout sessions and empty their shopping basket
-    HttpContext.Session.Remove("PendingCheckoutOrder");
-    HttpContext.Session.Remove(BasketSessionKey);
-
-    // 8. Send them straight to your working order success page, passing their new database Order ID
-    return RedirectToAction("Confirmation", new { id = order.Id });
+    return RedirectToAction("Index");
 }
 
+        
+        
 
-
-
-        // 3. GET: /Checkout/Confirmation/5
-        [HttpGet]
-
-        //defines an asynchronous action method called Confirmation.
-        //It expects an integer id, which is the Order ID passed in the URL
-        public async Task<IActionResult> Confirmation(int id)
-        {
-            var confirmedOrder = await _context.Orders.FindAsync(id); //looks up the order in the DB by its ID using Entity Framework's asynchronous find
-            if (confirmedOrder == null) return NotFound(); // if no matching order exists, return a 404 Not found
-            return View(confirmedOrder); //returns the confirmation view, passing the order object into the view so it can be displayed
-        }
-
-        // --- Helper Methods ---
-        //Defines a private method that returns the user's basket
-        //The basket is stored as a dictionary<int,int> where: key = product ID. value = quantity purchased
         private Dictionary<int, int> GetBasketFromSession()
         {
-            var sessionData = HttpContext.Session.GetString(BasketSessionKey); //reads a JSON string from session memory under the key BasketSessionKey.
-
-            /**
-                If nothing is stored, sessionData will be null
-                Otherwise -> deserialize JSON into a dictionary
-                The "??" fallback ensures that if deserialization fails, you still return an empty dictionary
-            **/
-            return sessionData == null ? new Dictionary<int, int>() : JsonSerializer.Deserialize<Dictionary<int, int>>(sessionData) ?? new Dictionary<int, int>();
-        }
-        //defines a private method that takes the basket dictionary and returns a decimal subtotal 
-        private decimal CalculateBasketSubtotal(Dictionary<int, int> basket)
-        {
-            decimal total = 0.00m; //creates a decimal variable called total initialized to 0
-            foreach (var kvp in basket) //Loops through each key/value pair in basket. kvp.Key = product ID, kvp.Value = quantity purchased
-            {
-                var product = _context.Products.Find(kvp.Key); //loks up the product from the db using the product ID
-                if (product != null) total += product.Price * kvp.Value; //if product exists, multiply the product's price by the quantity and add it to the total
-            }
-            return total; //ends the loop and return the computed subtotal
+            var sessionData = HttpContext.Session.GetString(BasketSessionKey);
+            return sessionData == null 
+                ? new Dictionary<int, int>() 
+                : System.Text.Json.JsonSerializer.Deserialize<Dictionary<int, int>>(sessionData) ?? new Dictionary<int, int>();
         }
     }
 }
