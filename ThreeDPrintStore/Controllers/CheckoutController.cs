@@ -143,7 +143,7 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
         // POST: /Checkout/ProcessSecurePayment
 [HttpPost]
 [ValidateAntiForgeryToken]
-public async Task<IActionResult> ProcessSecurePayment(string paymentIntentId)
+public IActionResult ProcessSecurePayment()
 {
     // 1. Grab that same temporary order package out of session memory again
     var pendingJson = HttpContext.Session.GetString("PendingCheckoutOrder");
@@ -161,14 +161,40 @@ public async Task<IActionResult> ProcessSecurePayment(string paymentIntentId)
 
     //verify payment with stripe
     StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
-    var intentService = new PaymentIntentService();
-    PaymentIntent intent = await intentService.GetAsync(paymentIntentId);
+    var domain = $"{Request.Scheme}://{Request.Host}";
 
-    if (intent.Status != "succeeded")
+    // 3. Create Stripe Hosted Checkout Session
+    var options = new SessionCreateOptions
     {
-        ModelState.AddModelError("", "Payment verification failed. Please try again.");
-        return View("PaymentSummary", order);
-    }
+        PaymentMethodTypes = new List<string> { "card" },
+        LineItems = new List<SessionLineItemOptions>
+        {
+            new SessionLineItemOptions
+            {
+                PriceData = new SessionLineItemPriceDataOptions
+                {
+                    UnitAmount = (long)(order.GrandTotal * 100), // convert to cents
+                    Currency = "usd",
+                    ProductData = new SessionLineItemPriceDataProductDataOptions
+                    {
+                        Name = "3D Print Order",
+                    },
+                },
+                Quantity = 1,
+            },
+        },
+        Mode = "payment",
+        SuccessUrl = $"{domain}/Checkout/Success",
+        CancelUrl = $"{domain}/Checkout/Cancel",
+    };
+
+    var service = new SessionService();
+    Session session = service.Create(options);
+
+    // 4. Redirect user to Stripe's hosted payment page
+    return Redirect(session.Url);
+}
+    
 
     //Record paid details onto order object
     order.AmountPaid = (decimal)(intent.Amount / 100.0);
