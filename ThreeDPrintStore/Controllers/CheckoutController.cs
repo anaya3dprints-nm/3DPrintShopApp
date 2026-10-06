@@ -3,6 +3,7 @@ using System.Text.Json; //Provides JSON serialization and deserialization functi
 using ThreeDPrintStore.Models; //Gives access to model classes in your project.
 using ThreeDPrintStore.Services; //Gives access to service classes (like your shipping service).
 using Stripe;
+using Microsoft.Extensions.Configuration;
 
 namespace ThreeDPrintStore.Controllers //Defines what namespace this controller belongs too
 {
@@ -12,14 +13,16 @@ namespace ThreeDPrintStore.Controllers //Defines what namespace this controller 
         private readonly StoreDbContext _context; //My db context, lets me query and save data
         private readonly ShippingService _shippingService; //service responsible for shipping calculations
         private const string BasketSessionKey = "UserShoppingBasket"; //The session key you use to store/retrieve the user's basket.
+        private readonly IConfiguration _configuration;
 
         //responsible for injecting dependencies into the controller
         /**
             -_context = context - saves the injected db context into private field
             -_shippingService - saves the injected shipping service
         **/
-        public CheckoutController(StoreDbContext context, ShippingService shippingService)
+        public CheckoutController(StoreDbContext context, ShippingService shippingService, IConfiguration configuration)
         {
+            _configuration = configuration;
             _context = context;
             _shippingService = shippingService;
         }

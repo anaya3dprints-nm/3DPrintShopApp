@@ -1,8 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using ThreeDPrintStore.Models;
 using ThreeDPrintStore.Services;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
+
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 // 1. Add MVC Controllers and Views
 builder.Services.AddControllersWithViews();
