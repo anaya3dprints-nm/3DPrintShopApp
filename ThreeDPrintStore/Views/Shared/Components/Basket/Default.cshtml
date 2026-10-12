@@ -1,0 +1,18 @@
+@model int
+
+<a class="nav-link position-relative text-dark" asp-controller="Basket" asp-action="Index">
+    <!-- SVG Shopping Basket Icon -->
+    <svg xmlns="http://w3.org" width="22" height="22" fill="currentColor" class="bi bi-basket" viewBox="0 0 16 16">
+        <path d="M5.071 1.243a.5.5 0 0 1 .858.514L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H.5a.5.5 0 0 1-.5-.5v-1A.5.5 0 0 1 .5 6h1.717L5.071 1.243zM3.5 10.5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 0 1h-8a.5.5 0 0 1-.5-.5zM4 12a.5.5 0 0 0 0 1h8a.5.5 0 0 0 0-1H4z"/>
+    </svg>
+
+    <!-- Badge Counter Bubble -->
+    <span id="cart-badge-container">
+        @if (Model > 0)
+        {
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                @Model
+            </span>
+        }
+    </span>
+</a>

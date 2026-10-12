@@ -1,0 +1,83 @@
+//namespaces (libraies)
+using Microsoft.AspNetCore.Mvc; //enables the use of MVC features like controllers and actions
+using Microsoft.EntityFrameworkCore;//enables the use of Entity Framework Core features like database context and async queries
+using ThreeDPrintStore.Models;//allows access to the models defined in the ThreeDPrintStore.Models namespace, such as Product and StoreDbContext
+using System.Text.Json;
+using Microsoft.AspNetCore.Hosting;
+
+//This groups the HomeController class logically inside the Controllers foler of project
+namespace ThreeDPrintStore.Controllers
+{
+    public class HomeController : Controller //Defines a new controller named HomeController that inherits from the Controller class, which gives it MVC abilities (returning views, routing, etc.).
+    {
+        //creates a variable named _context that holds your database context
+        //readonly means it can only be set once - in the constructor
+        //You'll use _context to talk to the database (Products, ect.)
+        private readonly StoreDbContext _context; 
+        private readonly IWebHostEnvironment _env; //variable to hold the web host environment, which provides information about the web server and the application's root path.    
+
+        //ASP.NET Core's dependency injection system automatically provides a StoreDbCOntext when the controller is created.
+        //This allows the controller to interact with the database without needing to manually create an instance of StoreDbContext.
+        public HomeController(StoreDbContext context, IWebHostEnvironment env)
+        {
+            _context = context;
+            _env = env;
+        }
+
+        //This method runs when the user goes to /Home/Home (or /Home if routed differently).
+        //IActionResult means it returns an MVC action (like a view)
+        //return View("Home") tells ASP.NET to return the Home.cshtml view.
+        //Action does not fetch data - it only return the Home.cshtml view.
+        /**public IActionResult Home()
+        {
+            //load the homepage view
+            return View("Home");
+        }**/
+
+        //async Task<IActionResult> - this action runs asynchronously because its doing a database call.
+        //_context.Products - refers to the Products table in your database.
+        //.ToListAsync() - fetches all the product rows asynchronously.
+        //activeInventory - variable that stores all the products.
+        //return View("Index", activeInventory) - sends the data to your Index.cshtml view.
+        //SO the Index page is my catalog, and it displays the list of products coming from the database.
+        public async Task<IActionResult> Index()
+        {
+            var activeInventory = await _context.Products.ToListAsync();
+            return View("Index", activeInventory); //Index.cshtml = Catalog page
+        }
+        //load national holiday JSON file
+        public List<NationalDay> GetNationalDays()
+        {
+            var path = Path.Combine(_env.WebRootPath, "data", "nationalDays.json");
+            var json = System.IO.File.ReadAllText(path);
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true //ignore case when matching JSON property names to C# property names
+            };
+            
+            return JsonSerializer.Deserialize<List<NationalDay>>(json, options) ?? new List<NationalDay>(); //prevent null returns by using null-coalescing operator (??) to return an empty list if the deserialization result is null.
+        }
+
+        //filter next 7 days of national holidays
+        public List <NationalDay> GetUpcomingNationalDays()
+        {
+            var allDays = GetNationalDays();
+
+            var today = DateTime.Today;
+            var weekAhead = today.AddDays(7);
+
+            return allDays
+                .Where(d => d.Date >= today && d.Date <= weekAhead)
+                .OrderBy(d => d.Date)
+                .ToList();
+        }
+
+        //Homepage + calendar feature
+        public IActionResult Home()
+        {
+            var upcoming = GetUpcomingNationalDays();
+            return View("Home",upcoming); // send model to Home.cshtml view
+        }
+    }
+}
