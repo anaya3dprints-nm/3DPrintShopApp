@@ -38,6 +38,55 @@ namespace ThreeDPrintStore.Controllers
             _emailService = emailService;
         }
 
+        //create quote action
+        
+[Authorize(Roles = "Admin")]
+[HttpPost]
+public ActionResult CreateQuote(double gramsUsed, double printHours, string customerEmail)
+{
+    var pricing = new PricingService();
+    var breakdown = pricing.CalculateCustomPrintPrice(gramsUsed, printHours);
+
+    // Create a new Quote record
+    var quote = new Quote
+    {
+        CustomerEmail = customerEmail,
+        Materials = breakdown.Materials,
+        MachineTime = breakdown.MachineTime,
+        ServiceFee = breakdown.ServiceFee,
+        Total = breakdown.Total,
+        Status = "Pending",
+        CreatedAt = DateTime.UtcNow
+    };
+
+    _context.Quotes.Add(quote);
+    _context.SaveChanges();
+
+    // Build acceptance links
+    var acceptUrl = Url.Action("AcceptQuote", "Quote", new { id = quote.Id }, Request.Url.Scheme);
+    var declineUrl = Url.Action("DeclineQuote", "Quote", new { id = quote.Id }, Request.Url.Scheme);
+
+    // Build email body
+    string body = $@"
+        Your 3D print quote is ready!
+
+        Materials: {breakdown.Materials:C}
+        Machine Time: {breakdown.MachineTime:C}
+        Service Fee: {breakdown.ServiceFee:C}
+        Total: {breakdown.Total:C}
+
+        Accept: {acceptUrl}
+        Decline: {declineUrl}
+    ";
+
+    // Send the email
+    _emailService.SendEmail(customerEmail, "Your 3D Print Quote", body);
+
+    return View("AdminQuoteSent", quote);
+}
+
+        
+
         //shows the form where admin will input grams/hours
         [Authorize(Roles = "Admin")]
         [HttpGet]
