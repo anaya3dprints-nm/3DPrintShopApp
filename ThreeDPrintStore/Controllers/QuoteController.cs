@@ -50,7 +50,7 @@ namespace ThreeDPrintStore.Controllers
         {
             var pricing = new PricingService();
             var breakdown = pricing.CalculateCustomPrintPrice(gramsUsed, printHours);
-            return View(breakdown);
+            return View("ShowQuote", breakdown);
         }
 
         // 1. GET: /Quote/RequestForm
