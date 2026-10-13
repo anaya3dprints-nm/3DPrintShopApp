@@ -37,9 +37,33 @@ namespace ThreeDPrintStore.Controllers
             _environment = environment;
             _emailService = emailService;
         }
+        
+//accept quote and decline
+public ActionResult AcceptQuote(int id)
+{
+    var quote = _context.Quotes.Find(id);
+    if (quote == null) return HttpNotFound();
+
+    quote.Status = "Accepted";
+    _context.SaveChanges();
+
+    return View("QuoteAccepted", quote);
+}
+
+public ActionResult DeclineQuote(int id)
+{
+    var quote = _context.Quotes.Find(id);
+    if (quote == null) return HttpNotFound();
+
+    quote.Status = "Declined";
+    _context.SaveChanges();
+
+    return View("QuoteDeclined", quote);
+}
+
+//
 
         //create quote action
-        
 [Authorize(Roles = "Admin")]
 [HttpPost]
 public ActionResult CreateQuote(double gramsUsed, double printHours, string customerEmail)
