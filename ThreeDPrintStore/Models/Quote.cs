@@ -13,4 +13,7 @@ public class Quote
 
     public DateTime? PrintedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
+
+    public decimal ShippingCost { get; set; }
+    public string ShippingMethod { get; set; }
 }
