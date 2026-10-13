@@ -47,7 +47,7 @@ public ActionResult AcceptQuote(int id)
     quote.Status = "Accepted";
     _context.SaveChanges();
 
-    return View("QuoteAccepted", quote);
+    return RedirectToAction("PayQuote", new { id = quote.Id });
 }
 
 public ActionResult DeclineQuote(int id)
@@ -62,6 +62,13 @@ public ActionResult DeclineQuote(int id)
 }
 
 //
+public ActionResult PayQuote(int id)
+{
+    var quote = _context.Quotes.Find(id);
+    if (quote == null) return HttpNotFound();
+
+    return View(quote);
+}
 
         //create quote action
 [Authorize(Roles = "Admin")]
