@@ -10,4 +10,7 @@ public class Quote
 
     public string Status { get; set; } // Pending, Accepted, Declined
     public DateTime CreatedAt { get; set; }
+
+    public DateTime? PrintedAt { get; set; }
+    public DateTime? CompletedAt { get; set; }
 }
