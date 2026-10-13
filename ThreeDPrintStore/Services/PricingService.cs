@@ -13,7 +13,7 @@ namespace ThreeDPrintStore.Services //declares the namespace where this service 
                     printHours → number of hours the printer will run
             This method calculates the final price of a custom print. 
         **/
-        public decimal CalculateCustomPrintPrice(double gramsUsed, double printHours)
+        public PriceBreakdown CalculateCustomPrintPrice(double gramsUsed, double printHours)
         {
             // You can adjust these base numbers anytime to match your actual operational costs!
             decimal filamentCostPerGram = 0.03m;  // ~$30 for a standard 1kg roll
@@ -31,7 +31,13 @@ namespace ThreeDPrintStore.Services //declares the namespace where this service 
             decimal baseCost = materialCost + runningCost;
             decimal finalPrice = baseCost * (1 + profitMarkup);
             
-            return Math.Round(finalPrice, 2);
+            return new PriceBreakdown
+            {
+                Materials = Math.round(materialCost, 2),
+                MachineTime = Math.Round(runningCost, 2),
+                ServiceFee = Math.Round(finalPrice - baseCost, 2),
+                Total = Math.Round(finalPrice, 2)
+            };
         }
     }
 }
