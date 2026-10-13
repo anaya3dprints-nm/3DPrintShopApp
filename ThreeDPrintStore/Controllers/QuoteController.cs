@@ -38,6 +38,14 @@ namespace ThreeDPrintStore.Controllers
             _emailService = emailService;
         }
 
+        //show quote to customer
+        public IActionResult ShowQuote(double gramsUsed, double printHours)
+        {
+            var pricing = new PricingService();
+            var breakdown = pricing.CalculateCustomPrintPrice(gramsUsed, printHours);
+            return View(breakdown);
+        }
+
         // 1. GET: /Quote/RequestForm
         [HttpGet]
         //Defines a standard (non‑async) action that returns a view.
