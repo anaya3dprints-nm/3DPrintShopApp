@@ -1,0 +1,12 @@
+@model ThreeDPrintStore.Models.Quote
+
+<h2>Complete Your Payment</h2>
+
+<p>Your accepted quote total: <strong>@Model.Total.ToString("C")</strong></p>
+
+<p>Click below to continue to secure payment.</p>
+
+/Quote/BeginStripePayment
+    <input type="hidden" name="quoteId" value="@Model.Id" />
+    <button type="submit">Pay Now</button>
+</form>
