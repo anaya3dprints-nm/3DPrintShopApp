@@ -70,6 +70,17 @@ public ActionResult PayQuote(int id)
 
     return View(quote);
 }
+//payment success route
+public IAction PaymentSuccess(int quoteId)
+{
+    var quote = _context.Quotes.Find(quoteId);
+    if (quote == null) return HttpNotFound();
+
+    quote.Status = "Paid";
+    _context.SaveChanges();
+
+    return View("PaymentSuccess", quote);
+}
 
         //create quote action
 [Authorize(Roles = "Admin")]
