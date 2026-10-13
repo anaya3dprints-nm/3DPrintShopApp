@@ -38,6 +38,13 @@ namespace ThreeDPrintStore.Controllers
             _emailService = emailService;
         }
 
+        //shows the form where admin will input grams/hours
+        [HttpGet]
+        public IActionResult AdminQuoteForm()
+        {
+            return View();
+        }
+
         //show quote to customer
         public IActionResult ShowQuote(double gramsUsed, double printHours)
         {
