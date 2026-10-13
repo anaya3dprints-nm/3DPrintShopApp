@@ -37,6 +37,36 @@ namespace ThreeDPrintStore.Controllers
             _environment = environment;
             _emailService = emailService;
         }
+
+        //mark as printed
+        [Authorize(Roles = "Admin")]
+        public IActionResult MarkAsPrinted(int id)
+        {
+            var quote = _context.Quotes.Find(id);
+            if (quote == null) return HttpNotFound();
+
+            quote.Status = "Printed";
+            quote.PrintedAt = DateTime.UtcNow;
+            _context.SaveChanges();
+
+            TempData["Message"] = "Quote marked as Printed.";
+            return RedirectToAction("Dashboard");
+        }
+
+        //mark as completed
+        [Authorize(Roles = "Admin")]
+        public IActionResult MarkAsCompleted(int id)
+        {
+            var quote = _context.Quotes.Find(id);
+            if (quote == null) return HttpNotFound();
+
+            quote.Status = "Completed";
+            quote.CompletedAt = DateTime.UtcNow;
+            _context.SaveChanges();
+
+            TempData["Message"] = "Quote marked as completed.";
+            return RedirectToAction("Dashboard");
+        }
         
 //accept quote
 public ActionResult AcceptQuote(int id)
