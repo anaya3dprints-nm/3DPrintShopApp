@@ -1,0 +1,10 @@
+@model ThreeDPrintStore.Models.PriceBreakdown
+
+<h2>Your Quote</h2>
+
+<ul>
+    <li>Materials: @Model.Materials.ToString("C")</li>
+    <li>Machine Time: @Model.MachineTime.ToString("C")</li>
+    <li>Service Fee: @Model.ServiceFee.ToString("C")</li>
+    <li><strong>Total: @Model.Total.ToString("C")</strong></li>
+</ul>
