@@ -19,6 +19,7 @@ namespace ThreeDPrintStore.Models //defines namespace where model classes live
         public DbSet<Product> Products { get; set; } = null!; //defines a table named Products in db
         public DbSet<QuoteRequest> QuoteRequests { get; set; } = null!; //defines a table for quote requests users submit
         public DbSet<Order> Orders { get; set; } = null!; //defines a db table for orders during checkout
+        public DbSet<Quote> Quotes { get; set; }
 
     }
 
