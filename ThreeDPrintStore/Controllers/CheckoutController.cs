@@ -27,6 +27,49 @@ namespace ThreeDPrintStore.Controllers
             return View(basket);
         }
 
+        //stripe payments for quotes
+        [HttpGet]
+        public IActionResult CreateQuoteCheckoutSession(int id)
+        {
+            var quote = _context.Quotes.Find(id);
+            if (quote == null) return NotFound();
+
+            StripeConfiguration.ApiKey = _configuration["Stripe:SecretKey"];
+
+            var lineItems = new List<SessionLineItemOptions>
+            {
+                new SessionLineItemOptions
+                {
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                        UnitAmount = (long)(quote.Total * 100), // Converts to cents
+                        Currency = "usd",
+                        ProductData = new SessionLineItemPriceDataProductDataOptions
+                        {
+                            Name = $"Custom 3D Print Quote #{id}",
+                            Description = "Custom 3D printed item orders"
+                        }
+                    },
+                    Quantity = 1
+            }
+        };
+        var domain = $"{Request.Scheme}.//{Request.Host}";
+
+        var options = new SessionCreateOptions
+        {
+            LineItems = lineItems,
+            Mode = "payment",
+            SuccessUrl = $"{domain}/Quote/PaymentSuccess?quoteId={quote.Id}",
+            CancelUrl = $"{domain}/Quote/PayQuote?id={quote.Id}"
+        };
+
+        var service = new SessionService();
+        Session session = service.Create(options);
+
+        return Redirect(session.Url);
+
+        
+
         // 2. POST: /Checkout/CreateCheckoutSession
 [HttpPost]
 public IActionResult CreateCheckoutSession()
