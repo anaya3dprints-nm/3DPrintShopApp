@@ -38,7 +38,7 @@ namespace ThreeDPrintStore.Controllers
             _emailService = emailService;
         }
         
-//accept quote and decline
+//accept quote
 public ActionResult AcceptQuote(int id)
 {
     var quote = _context.Quotes.Find(id);
@@ -47,9 +47,10 @@ public ActionResult AcceptQuote(int id)
     quote.Status = "Accepted";
     _context.SaveChanges();
 
-    return RedirectToAction("PayQuote", new { id = quote.Id });
+    return RedirectToAction("CheckoutQuote", "Payment", new { id = quote.Id });
 }
 
+//decline quote
 public ActionResult DeclineQuote(int id)
 {
     var quote = _context.Quotes.Find(id);
