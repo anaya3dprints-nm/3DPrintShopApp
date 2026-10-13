@@ -47,7 +47,7 @@ public ActionResult AcceptQuote(int id)
     quote.Status = "Accepted";
     _context.SaveChanges();
 
-    return RedirectToAction("CheckoutQuote", "Payment", new { id = quote.Id });
+    return RedirectToAction("CreateQuoteCheckoutSession", "checkout", new { quoteId = quote.Id });
 }
 
 //decline quote
