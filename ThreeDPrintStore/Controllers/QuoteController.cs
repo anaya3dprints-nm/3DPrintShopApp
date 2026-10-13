@@ -39,6 +39,7 @@ namespace ThreeDPrintStore.Controllers
         }
 
         //shows the form where admin will input grams/hours
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult AdminQuoteForm()
         {
