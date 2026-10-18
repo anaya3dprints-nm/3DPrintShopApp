@@ -243,7 +243,7 @@ public ActionResult CreateQuote(double gramsUsed, double printHours, string cust
 
     using var client = new SmtpClient("smtp.gmail.com", 587)
 {
-    Credentials = new NetworkCredential("anaya3dprints@gmail.com", "W0rkHarder$45$"),
+    Credentials = new NetworkCredential("anaya3dprints@gmail.com", "ybkmoheqwfyzwyli"),
     EnableSsl = true
 };    
 
