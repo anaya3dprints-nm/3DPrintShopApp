@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using ThreeDPrintStore.Services;
 using System.Net;
 using System.Net.Mail;
+using Microsoft.AspNetCore.Authorization;
 //Groups this controller class into the Controllers namespace
 namespace ThreeDPrintStore.Controllers
 {
@@ -43,7 +44,7 @@ namespace ThreeDPrintStore.Controllers
         public IActionResult MarkAsPrinted(int id)
         {
             var quote = _context.Quotes.Find(id);
-            if (quote == null) return HttpNotFound();
+            if (quote == null) return NotFound();
 
             quote.Status = "Printed";
             quote.PrintedAt = DateTime.UtcNow;
@@ -58,7 +59,7 @@ namespace ThreeDPrintStore.Controllers
         public IActionResult MarkAsCompleted(int id)
         {
             var quote = _context.Quotes.Find(id);
-            if (quote == null) return HttpNotFound();
+            if (quote == null) return NotFound();
 
             quote.Status = "Completed";
             quote.CompletedAt = DateTime.UtcNow;
@@ -69,10 +70,10 @@ namespace ThreeDPrintStore.Controllers
         }
         
 //accept quote
-public ActionResult AcceptQuote(int id)
+public IActionResult AcceptQuote(int id)
 {
     var quote = _context.Quotes.Find(id);
-    if (quote == null) return HttpNotFound();
+    if (quote == null) return NotFound();
 
     quote.Status = "Accepted";
     _context.SaveChanges();
@@ -81,10 +82,10 @@ public ActionResult AcceptQuote(int id)
 }
 
 //decline quote
-public ActionResult DeclineQuote(int id)
+public IActionResult DeclineQuote(int id)
 {
     var quote = _context.Quotes.Find(id);
-    if (quote == null) return HttpNotFound();
+    if (quote == null) return NotFound();
 
     quote.Status = "Declined";
     _context.SaveChanges();
@@ -93,18 +94,18 @@ public ActionResult DeclineQuote(int id)
 }
 
 //
-public ActionResult PayQuote(int id)
+public IActionResult PayQuote(int id)
 {
     var quote = _context.Quotes.Find(id);
-    if (quote == null) return HttpNotFound();
+    if (quote == null) return NotFound();
 
     return View(quote);
 }
 //payment success route
-public IAction PaymentSuccess(int quoteId)
+public IActionResult PaymentSuccess(int quoteId)
 {
     var quote = _context.Quotes.Find(quoteId);
-    if (quote == null) return HttpNotFound();
+    if (quote == null) return NotFound();
 
     quote.Status = "Paid";
     _context.SaveChanges();
@@ -115,7 +116,7 @@ public IAction PaymentSuccess(int quoteId)
         //create quote action
 [Authorize(Roles = "Admin")]
 [HttpPost]
-public ActionResult CreateQuote(double gramsUsed, double printHours, string customerEmail)
+public async Task<IActionResult> CreateQuote(double gramsUsed, double printHours, string customerEmail)
 {
     var pricing = new PricingService();
     var breakdown = pricing.CalculateCustomPrintPrice(gramsUsed, printHours);
@@ -136,8 +137,8 @@ public ActionResult CreateQuote(double gramsUsed, double printHours, string cust
     _context.SaveChanges();
 
     // Build acceptance links
-    var acceptUrl = Url.Action("AcceptQuote", "Quote", new { id = quote.Id }, Request.Url.Scheme);
-    var declineUrl = Url.Action("DeclineQuote", "Quote", new { id = quote.Id }, Request.Url.Scheme);
+    var acceptUrl = Url.Action("AcceptQuote", "Quote", new { id = quote.Id }, $"{Request.Scheme}://${Request.Host}");
+    var declineUrl = Url.Action("DeclineQuote", "Quote", new { id = quote.Id }, $"{Request.Scheme}://${Request.Host}");
 
     // Build email body
     string body = $@"
@@ -153,7 +154,7 @@ public ActionResult CreateQuote(double gramsUsed, double printHours, string cust
     ";
 
     // Send the email
-    _emailService.SendEmail(customerEmail, "Your 3D Print Quote", body);
+    await _emailService.SendEmailAsync(customerEmail, "Your 3D Print Quote", body);
 
     return View("AdminQuoteSent", quote);
 }

@@ -108,6 +108,50 @@ namespace ThreeDPrintStore.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("ThreeDPrintStore.Models.Quote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CustomerEmail")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("MachineTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Materials")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("PrintedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("ServiceFee")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("ShippingCost")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ShippingMethod")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Quotes");
+                });
+
             modelBuilder.Entity("ThreeDPrintStore.Models.QuoteRequest", b =>
                 {
                     b.Property<int>("Id")

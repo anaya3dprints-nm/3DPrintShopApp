@@ -1,4 +1,5 @@
 using System; //imports the System namespace, which provides basic .NET functionality
+using ThreeDPrintStore.Models;
 
 namespace ThreeDPrintStore.Services //declares the namespace where this service class lives
 {
@@ -33,7 +34,7 @@ namespace ThreeDPrintStore.Services //declares the namespace where this service 
             
             return new PriceBreakdown
             {
-                Materials = Math.round(materialCost, 2),
+                Materials = Math.Round(materialCost, 2),
                 MachineTime = Math.Round(runningCost, 2),
                 ServiceFee = Math.Round(finalPrice - baseCost, 2),
                 Total = Math.Round(finalPrice, 2)

@@ -37,7 +37,7 @@ namespace ThreeDPrintStore.Controllers
             //await _context.QuoteRequests = access the QuoteRequests table in mt DB using Entity Framework Core.
             //.OrderByDescending(q => q.Id) = Sorts the quote requests by their ID, highest first (newest first)
             //.ToListAsync() = Executes the query asynchronously and returns a list. 
-            var quotes = await _context.QuoteRequests
+            var quotes = await _context.Quotes
                                        .OrderByDescending(q => q.Id)
                                        .ToListAsync();
             return View(quotes); //retutn the dashboard view and passes the list of quotes into it so the UI can display them
@@ -77,7 +77,7 @@ namespace ThreeDPrintStore.Controllers
                     -number of printing hours
             **/
             
-            decimal printBasePrice = _pricingService.CalculateCustomPrintPrice(gramsUsed, printHours);
+            decimal printBasePrice = _pricingService.CalculateCustomPrintPrice(gramsUsed, printHours).Total;
             
             /**
                 decimal shippingCost - store shipping cost

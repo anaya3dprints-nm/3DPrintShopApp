@@ -1,4 +1,4 @@
-@model IEnumerable<ThreeDPrintStore.Models.QuoteRequest>
+@model IEnumerable<ThreeDPrintStore.Models.Quote>
 
 @{
     ViewData["Title"] = "Admin Calibration Hub";
@@ -74,7 +74,7 @@
                                 @* If the user just paid, admin may print *@
                                 @if (request.Status == "Paid")
                                 {
-                                    /Quote/MarkAsPrinted/@request.Id
+                                    <a class="btn btn-primary btn-sm" href="/Quote/MarkAsPrinted/@request.Id">
                                         Mark as Printed
                                     </a>
                                 }
@@ -82,7 +82,7 @@
                                 @* If printed, allow completion *@
                                 @if (request.Status == "Printed")
                                 {
-                                    /Quote/MarkAsCompleted/@request.Id
+                                    <a class="btn btn-success btn-sm" href="/Quote/MarkAsCompleted/@request.Id">
                                         Mark as Completed
                                     </a>
                                 }

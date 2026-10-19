@@ -7,6 +7,7 @@
 <p>Click below to continue to secure payment.</p>
 
 /Quote/BeginStripePayment
+<form asp-controller="Checkout" asp-action="CreateQuoteCheckoutSession" asp-route-id="@Model.Id" method="get">
     <input type="hidden" name="quoteId" value="@Model.Id" />
     <button type="submit">Pay Now</button>
 </form>
