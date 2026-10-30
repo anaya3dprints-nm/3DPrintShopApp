@@ -1,0 +1,40 @@
+@model IEnumerable<ThreeDPrintStore.Models.QuoteRequest>
+
+@{
+    ViewData["Title"] = "Pending Quote Requests";
+}
+
+<div class="container mt-4">
+    <h2>Pending Quote Requests</h2>
+
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Material</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var request in Model)
+            {
+                <tr>
+                    <td>@request.Id</td>
+                    <td>@request.CustomerEmail</td>
+                    <td>@request.FilamentType</td>
+                    <td>
+                        <a asp-controller="Quote" 
+                           asp-action="AdminQuoteForm" 
+                           asp-route-id="@request.Id" 
+                           asp-route-email="@request.CustomerEmail" 
+                           asp-route-material="@request.FilamentType" 
+                           class="btn btn-primary btn-sm">
+                            Calculate & Send Quote
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

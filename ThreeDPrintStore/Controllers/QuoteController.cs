@@ -114,7 +114,7 @@ public IActionResult PaymentSuccess(int quoteId)
 }
 
         //create quote action
-[Authorize(Roles = "Admin")]
+//[Authorize(Roles = "Admin")]
 [HttpPost]
 public async Task<IActionResult> CreateQuote(double gramsUsed, double printHours, string customerEmail)
 {
@@ -137,17 +137,18 @@ public async Task<IActionResult> CreateQuote(double gramsUsed, double printHours
     _context.SaveChanges();
 
     // Build acceptance links
-    var acceptUrl = Url.Action("AcceptQuote", "Quote", new { id = quote.Id }, $"{Request.Scheme}://${Request.Host}");
-    var declineUrl = Url.Action("DeclineQuote", "Quote", new { id = quote.Id }, $"{Request.Scheme}://${Request.Host}");
+    string baseUrl = $"{Request.Scheme}://{Request.Host}";
+    var acceptUrl = $"{baseUrl}/Quote/AcceptQuote/{quote.Id}";
+    var declineUrl = $"{baseUrl}/Quote/DeclinedQuote/{quote.Id}";
 
     // Build email body
     string body = $@"
         Your 3D print quote is ready!
 
-        Materials: {breakdown.Materials:C}
-        Machine Time: {breakdown.MachineTime:C}
-        Service Fee: {breakdown.ServiceFee:C}
-        Total: {breakdown.Total:C}
+        Materials: ${breakdown.Materials:F2}
+        Machine Time: ${breakdown.MachineTime:F2}
+        Service Fee: ${breakdown.ServiceFee:F2}
+        Total: ${breakdown.Total:F2}
 
         Accept: {acceptUrl}
         Decline: {declineUrl}
@@ -156,17 +157,23 @@ public async Task<IActionResult> CreateQuote(double gramsUsed, double printHours
     // Send the email
     await _emailService.SendEmailAsync(customerEmail, "Your 3D Print Quote", body);
 
-    return View("AdminQuoteSent", quote);
+    return RedirectToAction("PendingQuotes");
 }
 
         
 
         //shows the form where admin will input grams/hours
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpGet]
-        public IActionResult AdminQuoteForm()
+        public IActionResult AdminQuoteForm(int id, string email, string material)
         {
-            return View();
+            var viewModel = new ManualQuoteCalculationViewModel
+            {
+                QuoteRequestId = id,
+                CustomerEmail = email,
+                Material = material
+            };
+                return View(viewModel);
         }
 
         //show quote to customer
@@ -197,26 +204,18 @@ public async Task<IActionResult> CreateQuote(double gramsUsed, double printHours
         {
             if (ModelState.IsValid) //begins the method body. Checkswhether validation rules on quote were satidfies. If not valid, skip to the bottom and return the form again
             {
-                // Handle image upload if a file was provided
-                /**
-                    Checks whether the user actually uploaded a file:
-                        referenceFile != null → file exists
-                        referenceFile.Length > 0 → file contains data
-                    Only then will this block run.
-                **/
+                
+                string uploadDir = Path.Combine(_environment.WebRootPath, "uploads");
+                if (!Directory.Exists(uploadDir))
+                {
+                    Directory.CreateDirectory(uploadDir);
+                }
+
                 if (referenceFile != null && referenceFile.Length > 0)
                 {
-                    // Create an 'uploads' directory inside wwwroot if it doesn't exist
-                    string uploadDir = Path.Combine(_environment.WebRootPath, "uploads");
-                    if (!Directory.Exists(uploadDir))
-                    {
-                        Directory.CreateDirectory(uploadDir);
-                    }
-
-                    // Generate a completely unique filename to avoid overwrites
                     string uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(referenceFile.FileName);
-                    string filePath = Path.Combine(uploadDir, uniqueFileName); //builds the full path where the file will be saved on disk
-
+                    string filePath = Path.Combine(uploadDir, uniqueFileName); 
+                    
                     // opens a new file stream (creates a new file)
                     using (var fileStream = new FileStream(filePath, FileMode.Create))
                     {
@@ -227,6 +226,19 @@ public async Task<IActionResult> CreateQuote(double gramsUsed, double printHours
 
                     // Save the relative web path into our database record, QuoteRequest
                     quote.ReferenceImagePath = "/uploads/" + uniqueFileName;
+                }
+
+                if (photoFile != null && photoFile.Length > 0)
+                {
+                    string uniqueModelName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(photoFile.FileName);
+                    string modelPath = Path.Combine(uploadDir, uniqueModelName);
+
+                    using (var fileStream = new FileStream(modelPath, FileMode.Create))
+                    {
+                        await photoFile.CopyToAsync(fileStream);
+                    }
+
+                    
                 }
 
                 // Force status to Pending initially
@@ -306,6 +318,17 @@ public async Task<IActionResult> LookupResults(string customerEmail)
                                        .ToListAsync();
     //returns a view whose data model is the list of matching quotes. 
     return View(matchingQuotes);
+}
+
+    [HttpGet]
+public async Task<IActionResult> PendingQuotes()
+{
+    // Retrieve requests from your database context
+    var pendingRequests = await _context.QuoteRequests
+        .Where(q => q.Status == "Pending")
+        .ToListAsync();
+
+    return View(pendingRequests);
 }
 
 

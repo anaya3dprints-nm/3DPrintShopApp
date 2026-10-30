@@ -17,26 +17,23 @@ namespace ThreeDPrintStore.Services //declares the namespace where this service 
         public PriceBreakdown CalculateCustomPrintPrice(double gramsUsed, double printHours)
         {
             // You can adjust these base numbers anytime to match your actual operational costs!
-            decimal filamentCostPerGram = 0.03m;  // ~$30 for a standard 1kg roll
-            decimal electricityPerHour = 0.04m;   // Average printer power use
-            decimal machineWearPerHour = 0.12m;   // Cost to replace nozzles, belts, beds over time
-            decimal profitMarkup = 0.40m;         // Adds a 40% profit margin to the absolute cost
+            decimal filamentCostPerGram = 0.05m;  // covers premium and waste, support
+            decimal hourlyMachineRate = 2.50m;   // Average printer power use
+            decimal baseServiceFee = 5.00m;   // Cost to replace nozzles, belts, beds over time
+            //decimal profitMarkup = 0.40m;         // Adds a 40% profit margin to the absolute cost
 
             // Math: Raw materials
             decimal materialCost = (decimal)gramsUsed * filamentCostPerGram;
+            decimal machineTimeCost = (decimal)printHours * hourlyMachineRate;
             
-            // Math: Running time costs
-            decimal runningCost = (decimal)printHours * (electricityPerHour + machineWearPerHour);
-            
-            // Math: Combine and apply profit margin
-            decimal baseCost = materialCost + runningCost;
-            decimal finalPrice = baseCost * (1 + profitMarkup);
+            decimal subtotal = materialCost + machineTimeCost + baseServiceFee;
+            decimal finalPrice = subtotal * 1.30m;
             
             return new PriceBreakdown
             {
-                Materials = Math.Round(materialCost, 2),
-                MachineTime = Math.Round(runningCost, 2),
-                ServiceFee = Math.Round(finalPrice - baseCost, 2),
+                Materials =  Math.Round(materialCost, 2),
+                MachineTime = Math.Round(machineTimeCost, 2),
+                ServiceFee = Math.Round(baseServiceFee, 2),
                 Total = Math.Round(finalPrice, 2)
             };
         }
