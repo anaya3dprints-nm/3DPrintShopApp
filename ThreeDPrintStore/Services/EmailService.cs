@@ -1,12 +1,16 @@
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using MailKit.Net.Smtp;
 using MimeKit;
-using Microsoft.Extensions.Configuration;
 using Custom3DPrints.Models;
-using System.Threading.Tasks;
 
 namespace ThreeDPrintStore.Services
 {
-    public MailKitEmailService(IConfiguration configuration)
+    public class MailKitEmailService : IEmailService
+    {
+        private readonly IConfiguration _configuration;
+
+        public MailKitEmailService(IConfiguration configuration)
         {
             _configuration = configuration;
         }
