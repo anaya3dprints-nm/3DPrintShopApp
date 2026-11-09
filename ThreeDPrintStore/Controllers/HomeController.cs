@@ -40,10 +40,9 @@ namespace ThreeDPrintStore.Controllers
         //activeInventory - variable that stores all the products.
         //return View("Index", activeInventory) - sends the data to your Index.cshtml view.
         //SO the Index page is my catalog, and it displays the list of products coming from the database.
-        public async Task<IActionResult> Index()
+        public IActionResult Catalog()
         {
-            var activeInventory = await _context.Products.ToListAsync();
-            return View("Index", activeInventory); //Index.cshtml = Catalog page
+            return View();
         }
         //load national holiday JSON file
         public List<NationalDay> GetNationalDays()
