@@ -77,7 +77,7 @@ namespace ThreeDPrintStore.Controllers
                     -number of printing hours
             **/
             
-            decimal printBasePrice = _pricingService.CalculateCustomPrintPrice(gramsUsed, printHours).Total;
+            decimal printBasePrice = _pricingService.CalculateCustomPrintPrice(gramsUsed, printHours, 1, 0.0).Total;
             
             /**
                 decimal shippingCost - store shipping cost

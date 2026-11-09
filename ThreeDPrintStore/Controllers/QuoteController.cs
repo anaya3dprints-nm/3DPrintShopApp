@@ -6,6 +6,8 @@ using ThreeDPrintStore.Services;
 using System.Net;
 using System.Net.Mail;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.ComponentModel;
 //Groups this controller class into the Controllers namespace
 namespace ThreeDPrintStore.Controllers
 {
@@ -116,15 +118,20 @@ public IActionResult PaymentSuccess(int quoteId)
         //create quote action
 //[Authorize(Roles = "Admin")]
 [HttpPost]
-public async Task<IActionResult> CreateQuote(double gramsUsed, double printHours, string customerEmail)
+public async Task<IActionResult> CreateQuote(ManualQuoteCalculationViewModel model)
 {
+    if (!ModelState.IsValid)
+    {
+        return View("AdminQuoteForm", model);          
+    }
     var pricing = new PricingService();
-    var breakdown = pricing.CalculateCustomPrintPrice(gramsUsed, printHours);
+
+    var breakdown = pricing.CalculateCustomPrintPrice(model.GramsUsed, model.PrintHours, model.ColorCount, model.ShippingCost);
 
     // Create a new Quote record
     var quote = new Quote
     {
-        CustomerEmail = customerEmail,
+        CustomerEmail = model.CustomerEmail,
         Materials = breakdown.Materials,
         MachineTime = breakdown.MachineTime,
         ServiceFee = breakdown.ServiceFee,
@@ -134,7 +141,7 @@ public async Task<IActionResult> CreateQuote(double gramsUsed, double printHours
     };
 
     _context.Quotes.Add(quote);
-    _context.SaveChanges();
+    await _context.SaveChangesAsync();
 
     // Build acceptance links
     string baseUrl = $"{Request.Scheme}://{Request.Host}";
@@ -153,9 +160,8 @@ public async Task<IActionResult> CreateQuote(double gramsUsed, double printHours
         Accept: {acceptUrl}
         Decline: {declineUrl}
     ";
-
     // Send the email
-    await _emailService.SendEmailAsync(customerEmail, "Your 3D Print Quote", body);
+    await _emailService.SendEmailAsync(model.CustomerEmail, "Your 3D Print Quote", body);
 
     return RedirectToAction("PendingQuotes");
 }
@@ -165,24 +171,37 @@ public async Task<IActionResult> CreateQuote(double gramsUsed, double printHours
         //shows the form where admin will input grams/hours
         //[Authorize(Roles = "Admin")]
         [HttpGet]
-        public IActionResult AdminQuoteForm(int id, string email, string material)
+        public async Task<IActionResult> AdminQuoteForm(int? id, string email, string material)
         {
-            var viewModel = new ManualQuoteCalculationViewModel
+            var viewModel = new ManualQuoteCalculationViewModel();
+
+            if (id.HasValue && id.Value > 0)
+            {
+                var existingRequest = await _context.QuoteRequests.FindAsync(id.Value);
+                if (existingRequest != null)
+                {
+                    viewModel.QuoteRequestId = existingRequest.Id;
+                    viewModel.CustomerEmail = existingRequest.CustomerEmail;
+                    viewModel.Material = "PLA";
+
+                
+                }
+            }
+            else
+            {
+                viewModel.CustomerEmail = email ?? string.Empty;
+                viewModel.Material = material ?? "PLA";
+            }
+            /** viewModel = new ManualQuoteCalculationViewModel
             {
                 QuoteRequestId = id,
                 CustomerEmail = email,
                 Material = material
-            };
-                return View(viewModel);
+            };**/
+                return View("AdminQuoteForm", viewModel);
         }
 
-        //show quote to customer
-        public IActionResult ShowQuote(double gramsUsed, double printHours)
-        {
-            var pricing = new PricingService();
-            var breakdown = pricing.CalculateCustomPrintPrice(gramsUsed, printHours);
-            return View("ShowQuote", breakdown);
-        }
+    
 
         // 1. GET: /Quote/RequestForm
         [HttpGet]

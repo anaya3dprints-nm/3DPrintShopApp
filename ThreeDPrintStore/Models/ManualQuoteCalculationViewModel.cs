@@ -9,5 +9,8 @@ namespace ThreeDPrintStore.Models
         // Inputs from your slicer
         public double GramsUsed { get; set; }
         public double PrintHours { get; set; }
+
+        public int ColorCount { get; set; } = 1;
+        public double ShippingCost { get; set; } = 0.0;
     }
 }
