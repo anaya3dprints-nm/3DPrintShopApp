@@ -1,7 +1,10 @@
+using System.Threading.Tasks;
+using Custom3DPrints.Models;
+
 namespace ThreeDPrintStore.Services
 {
     public interface IEmailService
     {
-        public Task SendEmailAsync(string email, string subject, string message);
+        Task SendEmailAsync(PrintRequest request, PrintQuote quote, string stripeCheckoutUrl); //SendQuoteEmailAsync
     }
 }
