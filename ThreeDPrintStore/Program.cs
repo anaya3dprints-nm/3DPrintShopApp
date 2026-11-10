@@ -9,15 +9,12 @@ StripeConfiguration.ApiKey = builder.Configuration["StripeSettings:SecretKey"];
 
 // 1. Add MVC Controllers and Views
 builder.Services.AddControllersWithViews();
+// 2. Add Database Context
+builder.Services.AddDbContext<ThreeDPrintStore.Data.ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. Register our SQLite database file (store.db)
-builder.Services.AddDbContext<StoreDbContext>(options =>
-    options.UseSqlite("Data Source=store.db"));
 
-// 3. Register our pricing and shipping calculator services
-builder.Services.AddScoped<ShippingService>();
-builder.Services.AddScoped<PricingService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IEmailService, MailKitEmailService>();
 
 // 4. Configure Session memory for the Shopping Basket
 builder.Services.AddDistributedMemoryCache();
@@ -32,13 +29,13 @@ builder.Services.AddSession(options =>
 var app = builder.Build();
 app.UseStaticFiles();
 
-// Seed the SQLite database with products automatically on boot
+/** Seed the SQLite database with products automatically on boot
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<StoreDbContext>();
-    ThreeDPrintStore.Data.DbInitializer.Seed(context);
-}
+    //ThreeDPrintStore.Data.DbInitializer.Seed(context);
+}**/
 
 
 // Configure the HTTP request pipeline.

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using ThreeDPrintStore.Models; // Add this line
 
-namespace Custom3DPrints.Data
+namespace ThreeDPrintStore.Data
 {
 	public class ApplicationDbContext : DbContext
 	{
@@ -9,13 +10,13 @@ namespace Custom3DPrints.Data
 		}
 		
 		public DbSet<PrintRequest> PrintRequests => Set<PrintRequest>();
-		public DbSet<PrintQuote> PrintQuotes => Set<PriceQuote>();
+		public DbSet<PrintQuote> PrintQuotes => Set<PrintQuote>();
 		
-		proteted override void OnModelCreating(ModelBuilder modelBuilder)
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
 			
-			modelBuilder.Entity<PrintRequests>()
+			modelBuilder.Entity<PrintRequest>()
 				.HasOne(r => r.Quote)
 				.WithOne(q => q.PrintRequest)
 				.HasForeignKey<PrintQuote>(q => q.PrintRequestId)

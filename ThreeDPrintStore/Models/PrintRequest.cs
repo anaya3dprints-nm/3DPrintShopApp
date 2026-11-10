@@ -1,4 +1,5 @@
-using System;
+
+using ThreeDPrintStore.Models; // Or wherever QuoteStatus is defined
 using System.ComponentModel.DataAnnotations;
 
 namespace ThreeDPrintStore.Models
@@ -16,16 +17,16 @@ namespace ThreeDPrintStore.Models
 		[Required]
 		[MaxLength(150)]
 		public string CustomerEmail { get; set; } = string.Empty;
+		[Required]
+		public string? ProjectDescription { get; set; }
 		
-		public string ProjectDescription { get; set; }
-		
-		public string FilePath { get; set;) = string.Empty;
+		public string FilePath { get; set; } = string.Empty;
 		
 		public string MaterialType { get; set; } = "PLA";
 		
 		public int RequestedColorsCount { get; set; } = 1;
 		
-		public SubmittedAt { get; set; } = DueTime.UtcNow;
+		public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
 		
 		public QuoteStatus Status { get; set; } = QuoteStatus.PendingReview;
 		

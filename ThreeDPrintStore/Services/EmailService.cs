@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using MailKit.Net.Smtp;
 using MimeKit;
-using Custom3DPrints.Models;
+using ThreeDPrintStore.Models;
 
 namespace ThreeDPrintStore.Services
 {
@@ -15,10 +15,10 @@ namespace ThreeDPrintStore.Services
             _configuration = configuration;
         }
 
-        public async Task SendQuoteEmailAsync(PrintRequest request, PrintQuote quote, string stripeCheckoutUrl)
+        public async Task SendEmailAsync(PrintRequest request, PrintQuote quote, string stripeCheckoutUrl)
         {
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Anaya 3D Prints", _configuration["EmailSettings:SenderEmail"]));
+            message.From.Add(new MailboxAddress("Anaya 3D Prints", _configuration["EmailSettings:SenderEmail"] ?? ""));
             message.To.Add(new MailboxAddress(request.CustomerName, request.CustomerEmail));
             message.Subject = $"Your 3D Print Quote is Ready! (Order #{request.Id})";
 
@@ -49,14 +49,14 @@ namespace ThreeDPrintStore.Services
 
             using var client = new SmtpClient();
             await client.ConnectAsync(
-                _configuration["EmailSettings:SmtpServer"], 
+                _configuration["EmailSettings:SmtpServer"] ?? "", 
                 int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "587"), 
                 MailKit.Security.SecureSocketOptions.StartTls
             );
             
             await client.AuthenticateAsync(
-                _configuration["EmailSettings:Username"], 
-                _configuration["EmailSettings:Password"]
+                _configuration["EmailSettings:Username"] ?? "", 
+                _configuration["EmailSettings:Password"] ?? ""
             );
             
             await client.SendAsync(message);

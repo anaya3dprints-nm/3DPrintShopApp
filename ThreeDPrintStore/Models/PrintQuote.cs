@@ -1,4 +1,4 @@
-using System;
+using ThreeDPrintStore.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -12,7 +12,8 @@ namespace ThreeDPrintStore.Models
 		
 		[ForeignKey(nameof(PrintRequest))]
 		public int PrintRequestId { get; set; }
-		public PrintRequest PrintRequest { get; set; }
+		
+		public PrintRequest? PrintRequest { get; set; }
 		
 		//slicer inputs
 		[Column(TypeName = "decimal(18,2)")]

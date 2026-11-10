@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
-using Custom3DPrints.Data;
-using Custom3DPrints.Models;
+using ThreeDPrintStore.Data;
+using ThreeDPrintStore.Models;
 
-namespace Custom3DPrints.Controllers
+
+namespace ThreeDPrintStore.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class PrintRequestsController
+	public class PrintRequestsController : ControllerBase
 	{
 		private readonly ApplicationDbContext _db;
 		private readonly IWebHostEnvironment _env;
@@ -26,9 +27,9 @@ namespace Custom3DPrints.Controllers
 			[FromForm] int requestedColorsCount,
 			[FromForm] IFormFile modelFile)
 			{
-				if (modelFile == null || modelFile == 0)
+				if (modelFile == null || modelFile.Length == 0)
 				{
-					return.BadRequest("A valid 3D Model File is required.");
+					return BadRequest("A valid 3D Model File is required.");
 				}
 				
 				//secure file storage path setup
@@ -38,7 +39,7 @@ namespace Custom3DPrints.Controllers
 					Directory.CreateDirectory(uploadsFolder);
 				}
 				
-				var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(modelFile.FileName))}";
+				var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(modelFile.FileName)}";
 				var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 				
 				using (var stream = new FileStream(filePath, FileMode.Create))

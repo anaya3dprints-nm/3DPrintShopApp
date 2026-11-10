@@ -1,4 +1,4 @@
-namespace Custom3DPrints.Models
+namespace ThreeDPrintStore.Models
 {
 	public enum QuoteStatus
 	{

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Anaya3DPrints.Controllers
+namespace ThreeDPrintStore.Controllers
 {
     public class CatalogController : Controller
     {

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc; //enables the use of MVC features like controlle
 using Microsoft.EntityFrameworkCore;//enables the use of Entity Framework Core features like database context and async queries
 using ThreeDPrintStore.Models;//allows access to the models defined in the ThreeDPrintStore.Models namespace, such as Product and StoreDbContext
 using System.Text.Json;
+using ThreeDPrintStore.Data;
 using Microsoft.AspNetCore.Hosting;
 
 //This groups the HomeController class logically inside the Controllers foler of project
@@ -13,12 +14,12 @@ namespace ThreeDPrintStore.Controllers
         //creates a variable named _context that holds your database context
         //readonly means it can only be set once - in the constructor
         //You'll use _context to talk to the database (Products, ect.)
-        private readonly StoreDbContext _context; 
+        private readonly ApplicationDbContext _context; 
         private readonly IWebHostEnvironment _env; //variable to hold the web host environment, which provides information about the web server and the application's root path.    
 
         //ASP.NET Core's dependency injection system automatically provides a StoreDbCOntext when the controller is created.
         //This allows the controller to interact with the database without needing to manually create an instance of StoreDbContext.
-        public HomeController(StoreDbContext context, IWebHostEnvironment env)
+        public HomeController(ApplicationDbContext context, IWebHostEnvironment env)
         {
             _context = context;
             _env = env;

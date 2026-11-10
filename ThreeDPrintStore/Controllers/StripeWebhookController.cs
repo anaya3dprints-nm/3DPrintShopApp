@@ -7,8 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Stripe;
 using Stripe.Checkout;
-using Custom3DPrints.Data;
-using Custom3DPrints.Models;
+using ThreeDPrintStore.Data;
+using ThreeDPrintStore.Models;
 
 namespace ThreeDPrintStore.Controllers
 {
@@ -45,7 +45,7 @@ namespace ThreeDPrintStore.Controllers
                     webhookSecret
                 );
 
-                if (stripeEvent.Type == Events.CheckoutSessionCompleted)
+                if (stripeEvent.Type == "checkout.session.completed")
                 {
                     if (stripeEvent.Data.Object is Session session)
                     {

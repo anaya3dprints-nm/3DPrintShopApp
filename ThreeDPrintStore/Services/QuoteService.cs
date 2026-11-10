@@ -1,5 +1,7 @@
 using System; //imports the System namespace, which provides basic .NET functionality
 using ThreeDPrintStore.Models;
+using ThreeDPrintStore.Data; // or ThreeDPrintStore.Models depending on where your ApplicationDbContext.cs is
+
 
 namespace ThreeDPrintStore.Services //declares the namespace where this service class lives
 {
@@ -45,7 +47,7 @@ namespace ThreeDPrintStore.Services //declares the namespace where this service 
 			//update request status
 			request.Status = QuoteStatus.QuoteSent;
 			
-			_db.PrintQuote.Add(quote);
+			_db.PrintQuotes.Add(quote);
 			_db.SaveChanges();
 			
 			return quote;

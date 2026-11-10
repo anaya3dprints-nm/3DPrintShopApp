@@ -1,3 +1,4 @@
+using ThreeDPrintStore.Models;
 namespace ThreeDPrintStore.Services
 {
 	public record QuoteCalculationInput(
@@ -11,7 +12,7 @@ namespace ThreeDPrintStore.Services
 		decimal BaseHandlingFee = 4.00m
 	);
 	
-	public inteface IQuoteService
+	public interface IQuoteService
 	{
 		PrintQuote CalculateAndSaveQuote(QuoteCalculationInput input);
 	}
