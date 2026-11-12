@@ -1,16 +1,20 @@
 using Microsoft.AspNetCore.Mvc;
 using ThreeDPrintStore.Data;
 using ThreeDPrintStore.Models;
+using ThreeDPrintStore.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System.IO;
 
 public class QuoteController : Controller
 {
     private readonly ApplicationDbContext _db;
+    private readonly IQuoteService _quoteService;
 
-    public QuoteController(ApplicationDbContext db)
+    public QuoteController(ApplicationDbContext db, IQuoteService quoteService)
     {
         _db = db;
+        _quoteService = quoteService;
     }
 
     public IActionResult AdminRequests()
@@ -67,17 +71,30 @@ public class QuoteController : Controller
         return View();
     }
 
-    public IActionResult Details(int id)
+
+public async Task<IActionResult> Details(int id)
 {
-    var request = _db.PrintRequests
-                     .FirstOrDefault(r => r.Id == id);
+   var request = await _db.PrintRequests.Include(r => r.Quote).FirstOrDefaultAsync(r => r.Id == id);
 
-    if (request == null)
+   if (request == null)
     {
-        return NotFound();
+         return NotFound();
     }
-
     return View(request);
 }
 
+[HttpPost]
+[ValidateAntiForgeryToken]
+public IActionResult GenerateQuote(QuoteCalculationInput input)
+{
+    if (!ModelState.IsValid)
+    {
+        return RedirectToAction(nameof(Details), new { id = input.PrintRequestId });
+    }
+
+    
+    var quote = _quoteService.CalculateAndSaveQuote(input);
+
+    return RedirectToAction(nameof(Details), new {id = input.PrintRequestId});
+}
 }

@@ -15,6 +15,7 @@ builder.Services.AddDbContext<ThreeDPrintStore.Data.ApplicationDbContext>(option
 
 
 builder.Services.AddScoped<IEmailService, MailKitEmailService>();
+builder.Services.AddScoped<IQuoteService, ThreeDPrintStore.Services.QuoteService>();
 
 // 4. Configure Session memory for the Shopping Basket
 builder.Services.AddDistributedMemoryCache();
@@ -27,7 +28,7 @@ builder.Services.AddSession(options =>
 
 
 var app = builder.Build();
-app.UseStaticFiles();
+
 
 /** Seed the SQLite database with products automatically on boot
 using (var scope = app.Services.CreateScope())

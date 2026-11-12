@@ -6,7 +6,7 @@
 
 <h2>Request Details</h2>
 
-<div class="card">
+<div class="card mb-4">
     <div class="card-body">
 
         <h4>@Model.CustomerName</h4>
@@ -39,9 +39,79 @@
             @Model.SubmittedAt
         </p>
 
+        <p>
+            <strong>Status:</strong>
+            @Model.Status
+        </p>
+
     </div>
 </div>
 
-<a asp-action="AdminRequests" class="btn btn-secondary mt-3">
+@if (Model.Quote == null)
+{
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Generate Quote</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="GenerateQuote" asp-controller="Quote" method="post">
+                <input type="hidden" name="PrintRequestId" value="@Model.Id" />
+                <input type="hidden" name="ColorCount" value="@Model.RequestedColorsCount" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Filament Weight (grams)</label>
+                        <input type="number" step="0.01" name="FilamentGrams" class="form-control" required />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Estimated Print Time (hours)</label>
+                        <input type="number" step="0.01" name="EstimatedPrintHours" class="form-control" required />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Material Cost / Gram ($)</label>
+                        <input type="number" step="0.01" name="MaterialCostPerGram" value="0.03" class="form-control" required />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Hourly Machine Rate ($)</label>
+                        <input type="number" step="0.01" name="HourlyMachineRate" value="5.00" class="form-control" required />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Multi-Color Fee / Color ($)</label>
+                        <input type="number" step="0.01" name="MultiColorFeePerColor" value="2.50" class="form-control" required />
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Base Handling Fee ($)</label>
+                        <input type="number" step="0.01" name="BaseHandlingFee" value="3.00" class="form-control" required />
+                    </div>
+                </div>
+                    
+                <button type="submit" class="btn btn-success">Generate Quote</button>
+            </form>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card mb-4 border-success">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Generated Quote Breakdown</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>SLicer Inputs:</strong>@Model.Quote.FilamentGrams g | @Model.Quote.EstimatedPrintHours hrs |  @Model.Quote.ColorCount colors(s)</p>
+            <hr />
+            <p><strong>Material Subtotal:</strong> @Model.Quote.MaterialSubtotal.ToString("C")</p>
+            <p><strong>Labor & Machine:</strong> @Model.Quote.LaborMachineSubtotal.ToString("C")</p>
+            <p><strong>Multicolor Surcharge:</strong> @Model.Quote.MultiColorSurcharge.ToString("C")</p>
+            <p><strong>Base Handling Fee:</strong> @Model.Quote.BaseHandlingFee.ToString("C")</p>
+            <hr />
+            <h4>Total Price: @Model.Quote.FinalTotalPrice.ToString("C")</h4>
+        </div>
+    </div>
+    
+}
+
+<a asp-action="AdminRequests" class="btn btn-secondary">
     Back to Requests
 </a>
