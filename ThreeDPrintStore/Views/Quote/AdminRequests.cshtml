@@ -1,0 +1,54 @@
+@model IEnumerable<ThreeDPrintStore.Models.PrintRequest>
+    @{
+    ViewData["Title"] = "Admin Requests";
+}
+
+<h2 class="mb-4">Customer Print Requests</h2>
+
+<table class="table table-striped">
+
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Colors</th>
+            <th>Status</th>
+            <th>Submitted</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    @foreach (var request in Model)
+    {
+        <tr>
+
+            <td>@request.CustomerName</td>
+
+            <td>@request.CustomerEmail</td>
+
+            <td>@request.RequestedColorsCount</td>
+
+            <td>
+                <span class="badge bg-warning">
+                @request.Status
+                </span>
+            </td>
+
+            <td>@request.SubmittedAt.ToLocalTime()</td>
+
+            <td>
+                <a asp-action="Details"
+                   asp-route-id="@request.Id"
+                   class="btn btn-primary btn-sm">
+                    View
+                </a>
+            </td>
+
+        </tr>
+    }
+
+    </tbody>
+
+</table>

@@ -1,0 +1,47 @@
+@model ThreeDPrintStore.Models.PrintRequest
+
+@{
+    ViewData["Title"] = "Request Details";
+}
+
+<h2>Request Details</h2>
+
+<div class="card">
+    <div class="card-body">
+
+        <h4>@Model.CustomerName</h4>
+
+        <p>
+            <strong>Email:</strong>
+            @Model.CustomerEmail
+        </p>
+
+        <p>
+            <strong>Description:</strong>
+        </p>
+
+        <p>
+            @Model.ProjectDescription
+        </p>
+
+        <p>
+            <strong>Colors:</strong>
+            @Model.RequestedColorsCount
+        </p>
+
+        <p>
+            <strong>Material:</strong>
+            @Model.MaterialType
+        </p>
+
+        <p>
+            <strong>Submitted:</strong>
+            @Model.SubmittedAt
+        </p>
+
+    </div>
+</div>
+
+<a asp-action="AdminRequests" class="btn btn-secondary mt-3">
+    Back to Requests
+</a>

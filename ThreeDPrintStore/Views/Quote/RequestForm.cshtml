@@ -1,0 +1,75 @@
+@model ThreeDPrintStore.Models.PrintRequest
+
+@{
+    ViewData["Title"] = "Custom 3D Print Request";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h2>Request A Custom 3D Print</h2>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="RequestForm"
+                  asp-controller="Quote"
+                  method="post"
+                  enctype="multipart/form-data">
+
+                <div class="mb-3">
+                    <label asp-for="CustomerName" class="form-label"></label>
+                    <input asp-for="CustomerName" class="form-control" />
+                    <span asp-validation-for="CustomerName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CustomerEmail" class="form-label"></label>
+                    <input asp-for="CustomerEmail" class="form-control" />
+                    <span asp-validation-for="CustomerEmail" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ProjectDescription" class="form-label">
+                        Describe Your Project
+                    </label>
+
+                    <textarea asp-for="ProjectDescription"
+                              class="form-control"
+                              rows="5"></textarea>
+                </div>
+
+                <div class="alert alert-info">
+                <strong>Material:</strong> All custom prints are currently produced in PLA filament.
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="RequestedColorsCount"
+                           class="form-label">
+                        Number of Colors
+                    </label>
+
+                    <input asp-for="RequestedColorsCount"
+                           type="number"
+                           min="1"
+                           max="4"
+                           class="form-control" />
+                </div>
+                <div class="mb-3">
+                <label class="form-label">Upload STL, 3MF, or OBJ File</label>
+                <input type="file"
+                    name="modelFile"
+                    class="form-control"
+                    accept=".stl,.3mf,.obj" />
+            </div>
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    Submit Request
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+</div>

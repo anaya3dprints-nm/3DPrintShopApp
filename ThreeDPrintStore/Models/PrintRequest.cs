@@ -18,6 +18,7 @@ namespace ThreeDPrintStore.Models
 		[MaxLength(150)]
 		public string CustomerEmail { get; set; } = string.Empty;
 		[Required]
+	
 		public string? ProjectDescription { get; set; }
 		
 		public string FilePath { get; set; } = string.Empty;

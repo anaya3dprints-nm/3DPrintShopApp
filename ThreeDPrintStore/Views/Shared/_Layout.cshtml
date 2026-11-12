@@ -29,7 +29,32 @@
 
             </ul>
             <!-- Separated administrative layout gateway link -->
-          
+            @using System.Text.Json
+            @using ThreeDPrintStore.Models
+
+         @{
+            var cartJson = Context.Session.GetString("Cart");
+
+            var cart = string.IsNullOrEmpty(cartJson)
+                ? new List<CartItem>()
+                : JsonSerializer.Deserialize<List<CartItem>>(cartJson)!;
+
+    var cartCount = cart.Sum(x => x.Quantity);
+}
+            <a asp-controller="Cart"
+                asp-action="Index"
+                class="btn btn-primary position-relative">
+
+    🛒 Cart
+
+    <span id="cart-count"
+          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+
+        @cartCount
+
+    </span>
+
+</a>
         </div>
     </div>
 </nav>

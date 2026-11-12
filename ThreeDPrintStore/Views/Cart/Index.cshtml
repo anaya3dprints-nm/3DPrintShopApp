@@ -1,0 +1,44 @@
+@model List<CartItem>
+
+@{
+    decimal subtotal =
+        Model.Sum(x => x.Price * x.Quantity);
+
+    decimal shipping =
+        subtotal >= 25 ? 0 : 2;
+
+    decimal total =
+        subtotal + shipping;
+}
+
+<h1>Your Cart</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Each</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    @foreach(var item in Model)
+    {
+        <tr>
+            <td>@item.Name</td>
+            <td>@item.Quantity</td>
+            <td>$@item.Price</td>
+            <td>$@(item.Price * item.Quantity)</td>
+        </tr>
+    }
+
+    </tbody>
+
+</table>
+
+<h4>Subtotal: $@subtotal</h4>
+<h4>Shipping: $@shipping</h4>
+<h3>Total: $@total</h3>

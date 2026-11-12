@@ -14,6 +14,9 @@
         <!-- Item 1: La Llorona Duck -->
         <div class="col-md-3 mb-4">
             <div class="card h-100 shadow-sm border-0">
+                 <img src="~/images/lallorona.jpg"
+                            class="card-img-top"
+                        alt="La Llorona Duck" />
                 <div class="card-body d-flex flex-column">
                     <span class="badge bg-success mb-2 w-auto align-self-start">In Stock</span>
                     <h5 class="card-title fw-bold">La Llorona Duck</h5>
@@ -21,12 +24,14 @@
                         Inspired by Southwestern folklore with a spooky 3D-printed twist.
                     </p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="h5 mb-0 text-primary fw-bold">$5.00</span>
-                        <a href="https://buy.stripe.com/test_YOUR_LLORONA_LINK" 
-                           target="_blank" 
-                           class="btn btn-sm btn-primary px-3">
-                           Buy Now
-                        </a>
+                        
+                    <form asp-controller="Cart" asp-action="Add" method="post">
+                        <input type="hidden" name="productId" value="1" />
+                        <input type="hidden" name="name" value="La Llorona Duck" />
+                        <input type="hidden" name="price" value="5" />
+                        <button type="submit" class="btn btn-sm btn-primary px-3">Add To Cart</button>
+                    </form>
+                
                     </div>
                 </div>
             </div>
@@ -35,6 +40,9 @@
         <!-- Item 2: Roswell Alien Duck -->
         <div class="col-md-3 mb-4">
             <div class="card h-100 shadow-sm border-0">
+                 <img src="~/images/alien.jpg"
+            class="card-img-top"
+             alt="Roswell Alien Duck" />
                 <div class="card-body d-flex flex-column">
                     <span class="badge bg-warning text-dark mb-2 w-auto align-self-start">Limit 5 Per Order</span>
                     <h5 class="card-title fw-bold">Roswell Alien Duck</h5>
@@ -42,12 +50,14 @@
                         Features iconic extraterrestrial styling in high-speed PLA.
                     </p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="h5 mb-0 text-primary fw-bold">$5.00</span>
-                        <a href="https://buy.stripe.com/test_YOUR_ALIEN_LINK" 
-                           target="_blank" 
-                           class="btn btn-sm btn-primary px-3">
-                           Buy Now
-                        </a>
+                        
+                    <form asp-controller="Cart" asp-action="Add" method="post">
+                        <input type="hidden" name="productId" value="2" />
+                        <input type="hidden" name="name" value="Roswell Alien Duck" />
+                        <input type="hidden" name="price" value="5" />
+                        <button type="submit" class="btn btn-sm btn-primary px-3">Add To Cart</button>
+                    </form>
+                        
                     </div>
                 </div>
             </div>
@@ -56,6 +66,9 @@
         <!-- Item 3: Green Chile Duck -->
         <div class="col-md-3 mb-4">
             <div class="card h-100 shadow-sm border-0">
+                 <img src="~/images/greenchile.jpg"
+                    class="card-img-top"
+                    alt="Green Chile Duck" />
                 <div class="card-body d-flex flex-column">
                     <span class="badge bg-success mb-2 w-auto align-self-start">In Stock</span>
                     <h5 class="card-title fw-bold">Green Chile Duck</h5>
@@ -63,12 +76,14 @@
                         A playful tribute combining New Mexico's iconic green chile with a classic duck design.
                     </p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="h5 mb-0 text-primary fw-bold">$5.00</span>
-                        <a href="https://buy.stripe.com/test_YOUR_GREEN_CHILE_LINK" 
-                           target="_blank" 
-                           class="btn btn-sm btn-primary px-3">
-                           Buy Now
-                        </a>
+                     
+                        <form asp-controller="Cart" asp-action="Add" method="post">
+                        <input type="hidden" name="productId" value="3" />
+                        <input type="hidden" name="name" value="Green Chile Duck" />
+                        <input type="hidden" name="price" value="5" />
+                        <button type="submit" class="btn btn-sm btn-primary px-3">Add To Cart</button>
+                    </form>
+                        
                     </div>
                 </div>
             </div>
@@ -77,6 +92,9 @@
         <!-- Item 4: Red Chile Duck -->
         <div class="col-md-3 mb-4">
             <div class="card h-100 shadow-sm border-0">
+                 <img src="~/images/redchile.jpg"
+                    class="card-img-top"
+                        alt="Red Chile Duck" />
                 <div class="card-body d-flex flex-column">
                     <span class="badge bg-warning text-dark mb-2 w-auto align-self-start">Limit 5 Per Order</span>
                     <h5 class="card-title fw-bold">Red Chile Duck</h5>
@@ -84,69 +102,30 @@
                         A whimsical 3D-printed collectible fusion of New Mexico red chile culture.
                     </p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="h5 mb-0 text-primary fw-bold">$5.00</span>
-                        <a href="https://buy.stripe.com/test_YOUR_RED_CHILE_LINK" 
-                           target="_blank" 
-                           class="btn btn-sm btn-primary px-3">
-                           Buy Now
-                        </a>
+                       
+                    <form asp-controller="Cart" asp-action="Add" method="post">
+                        <input type="hidden" name="productId" value="4" />
+                        <input type="hidden" name="name" value="Red Chile Duck" />
+                        <input type="hidden" name="price" value="5" />
+                        <button type="submit" class="btn btn-sm btn-primary px-3">Add To Cart</button>
+                    </form>
+                       
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Catalog Summary Table -->
-    <h3 class="fw-bold mb-3">Quick Order Table</h3>
-    <div class="table-responsive shadow-sm rounded">
-        <table class="table table-hover align-middle mb-0 bg-white">
-            <thead class="table-dark">
-                <tr>
-                    <th scope="col">Product</th>
-                    <th scope="col">Material / Finish</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Availability</th>
-                    <th scope="col" class="text-end">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>La Llorona Duck</strong></td>
-                    <td>High-Speed PLA (Multi-color)</td>
-                    <td>$5.00 USD</td>
-                    <td><span class="badge bg-success">In Stock</span></td>
-                    <td class="text-end">
-                        <a href="https://buy.stripe.com/test_bJe6oI4hu8qU5iz0YAbwk00" target="_blank" class="btn btn-sm btn-outline-primary">Order Link</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Roswell Alien Duck</strong></td>
-                    <td>High-Speed PLA (Green accent)</td>
-                    <td>$5.00 USD</td>
-                    <td><span class="badge bg-warning text-dark">Max 5 per buyer</span></td>
-                    <td class="text-end">
-                        <a href="https://buy.stripe.com/test_9B69AU29maz212j7mYbwk01" target="_blank" class="btn btn-sm btn-outline-primary">Order Link</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Green Chile Duck</strong></td>
-                    <td>High-Speed PLA (Green accent)</td>
-                    <td>$5.00 USD</td>
-                    <td><span class="badge bg-success">In Stock</span></td>
-                    <td class="text-end">
-                        <a href="https://buy.stripe.com/test_9B6dRa01e0Ys6mD36Ibwk02" target="_blank" class="btn btn-sm btn-outline-primary">Order Link</a>
-                    </td>
-                </tr>
-                <tr>
-                    <td><strong>Red Chile Duck</strong></td>
-                    <td>High-Speed PLA (Red accent)</td>
-                    <td>$5.00 USD</td>
-                    <td><span class="badge bg-warning text-dark">Max 5 per buyer</span></td>
-                    <td class="text-end">
-                        <a href="https://buy.stripe.com/test_5kQ7sM7tG5eIaCT9v6bwk03" target="_blank" class="btn btn-sm btn-outline-primary">Order Link</a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 </div>
+<style>
+    .card-img-top {
+        height: 250px;
+        object-fit: cover;
+        border-top-left-radius: .375rem;
+        border-top-right-radius: .375rem;
+    }
+</style>
+
+}
