@@ -39,6 +39,10 @@
 
 </table>
 
-<h4>Subtotal: $@subtotal</h4>
-<h4>Shipping: $@shipping</h4>
-<h3>Total: $@total</h3>
+<h4>Subtotal:  @Model.Subtotal.ToString("C0")</h4>
+
+<p class="text-muted">Shipping calculated at checkout.</p>
+
+<form asp-controller="Checkout" asp-action="CreateCheckoutSession" method="post">
+    <button type="submit" class="btn btn-primary btn-lg">Proceed to Checkout</button>
+</form>
