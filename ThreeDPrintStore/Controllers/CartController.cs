@@ -64,69 +64,133 @@ public class CartController : Controller
     [HttpPost]
     public IActionResult Checkout()
     {
-        var cartJson = HttpContext.Session.GetString("Cart");
+        
+var cartJson = HttpContext.Session.GetString("Cart");
 
-        var cart = string.IsNullOrEmpty(cartJson)
-            ? new List<CartItem>()
-            : JsonSerializer.Deserialize<List<CartItem>>(cartJson)!;
+    var cart = string.IsNullOrEmpty(cartJson)
+        ? new List<CartItem>()
+        : JsonSerializer.Deserialize<List<CartItem>>(cartJson)!;
 
-        if (!cart.Any())
+    if (!cart.Any())
+    {
+        return RedirectToAction("Index");
+    }
+
+    // Calculate subtotal
+    var subtotal = cart.Sum(i => i.Price * i.Quantity);
+
+    // Build Stripe line items
+    var lineItems = cart.Select(item => new SessionLineItemOptions
+    {
+        PriceData = new SessionLineItemPriceDataOptions
         {
-            return RedirectToAction("Index");
-        }
+            Currency = "usd",
+            UnitAmount = (long)(item.Price * 100),
+            ProductData = new SessionLineItemPriceDataProductDataOptions
+            {
+                Name = item.Name
+            }
+        },
 
-        var lineItems = cart.Select(item => new SessionLineItemOptions
-        {
-            PriceData = new SessionLineItemPriceDataOptions
-            {
-                Currency = "usd",
-                UnitAmount = (long)(item.Price * 100),
-                ProductData = new SessionLineItemPriceDataProductDataOptions
-                {
-                    Name = item.Name,
-                },
-            },
-            Quantity = item.Quantity,
-        }).ToList();
+        Quantity = item.Quantity
+    }).ToList();
 
-        var options = new SessionCreateOptions
+    // Shipping options
+    List<SessionShippingOptionOptions> shippingOptions;
+
+    if (subtotal >= 50)
+    {
+        shippingOptions = new List<SessionShippingOptionOptions>
         {
-            Mode = "payment",
-            LineItems = lineItems,
-            ShippingAddressCollection = new SessionShippingAddressCollectionOptions
+            new SessionShippingOptionOptions
             {
-                AllowedCountries = new List<string> { "US" },
-            },
-            ShippingOptions = new List<SessionShippingOptionOptions>
-            {
-                new SessionShippingOptionOptions
-                {
-                    ShippingRateData = new SessionShippingOptionShippingRateDataOptions
+                ShippingRateData =
+                    new SessionShippingOptionShippingRateDataOptions
                     {
                         Type = "fixed_amount",
-                        FixedAmount = new SessionShippingOptionShippingRateDataFixedAmountOptions
-                        {
-                            Amount = 200, // $2.00 in cents
-                            Currency = "usd",
-                        },
-                        DisplayName = "Standard Shipping",
-                    },
-                },
-            },
-            SuccessUrl = Url.Action("Success", "Cart", null, Request.Scheme),
-            CancelUrl = Url.Action("Index", "Cart", null, Request.Scheme),
+                        DisplayName = "Free Shipping",
+
+                        FixedAmount =
+                            new SessionShippingOptionShippingRateDataFixedAmountOptions
+                            {
+                                Amount = 0,
+                                Currency = "usd"
+                            }
+                    }
+            }
         };
-
-        var service = new SessionService();
-        Session session = service.Create(options);
-
-        return Redirect(session.Url);
     }
-
-    public IActionResult Success()
+    else
     {
-        // Clear the cart after successful payment
-        HttpContext.Session.Remove("Cart");
-        return View();
+        shippingOptions = new List<SessionShippingOptionOptions>
+        {
+            new SessionShippingOptionOptions
+            {
+                ShippingRateData =
+                    new SessionShippingOptionShippingRateDataOptions
+                    {
+                        Type = "fixed_amount",
+                        DisplayName = "Albuquerque / Rio Rancho Delivery",
+
+                        FixedAmount =
+                            new SessionShippingOptionShippingRateDataFixedAmountOptions
+                            {
+                                Amount = 200,
+                                Currency = "usd"
+                            }
+                    }
+            },
+
+            new SessionShippingOptionOptions
+            {
+                ShippingRateData =
+                    new SessionShippingOptionShippingRateDataOptions
+                    {
+                        Type = "fixed_amount",
+                        DisplayName = "USPS Shipping",
+
+                        FixedAmount =
+                            new SessionShippingOptionShippingRateDataFixedAmountOptions
+                            {
+                                Amount = 895,
+                                Currency = "usd"
+                            }
+                    }
+            }
+        };
     }
-}
+
+    var options = new SessionCreateOptions
+    {
+        Mode = "payment",
+
+        LineItems = lineItems,
+
+        ShippingAddressCollection =
+            new SessionShippingAddressCollectionOptions
+            {
+                AllowedCountries = new List<string> { "US" }
+            },
+
+        ShippingOptions = shippingOptions,
+
+        SuccessUrl = Url.Action(
+            "Success",
+            "Cart",
+            null,
+            Request.Scheme),
+
+        CancelUrl = Url.Action(
+            "Index",
+            "Cart",
+            null,
+            Request.Scheme)
+    };
+
+    var service = new SessionService();
+    Session session = service.Create(options);
+
+    return Redirect(session.Url);
+
+    }
+}   
