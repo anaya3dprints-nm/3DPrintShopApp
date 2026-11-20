@@ -99,7 +99,7 @@ else
             <h5 class="mb-0">Generated Quote Breakdown</h5>
         </div>
         <div class="card-body">
-            <p><strong>SLicer Inputs:</strong>@Model.Quote.FilamentGrams g | @Model.Quote.EstimatedPrintHours hrs |  @Model.Quote.ColorCount colors(s)</p>
+            <p><strong>Slicer Inputs:</strong>@Model.Quote.FilamentGrams g | @Model.Quote.EstimatedPrintHours hrs |  @Model.Quote.ColorCount colors(s)</p>
             <hr />
             <p><strong>Material Subtotal:</strong> @Model.Quote.MaterialSubtotal.ToString("C")</p>
             <p><strong>Labor & Machine:</strong> @Model.Quote.LaborMachineSubtotal.ToString("C")</p>
@@ -112,6 +112,13 @@ else
     
 }
 
+<div class="d-flex gap-2 mt-3">
 <a asp-action="AdminRequests" class="btn btn-secondary">
     Back to Requests
 </a>
+
+<form asp-controller="Quote" asp-action="SendEmailQuote" method="post">
+    <input type="hidden" name="requestId" value="@Model.Id" />
+    <button type="submit" class="btn btn-primary">Send Quote to Customer</button>
+</form>
+</div>

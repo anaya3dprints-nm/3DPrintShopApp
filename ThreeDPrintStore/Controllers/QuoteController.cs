@@ -10,11 +10,13 @@ public class QuoteController : Controller
 {
     private readonly ApplicationDbContext _db;
     private readonly IQuoteService _quoteService;
+    private readonly IEmailService _emailService;
 
-    public QuoteController(ApplicationDbContext db, IQuoteService quoteService)
+    public QuoteController(ApplicationDbContext db, IQuoteService quoteService, IEmailService emailService)
     {
         _db = db;
         _quoteService = quoteService;
+        _emailService = emailService;
     }
 
     public IActionResult AdminRequests()
@@ -97,4 +99,36 @@ public IActionResult GenerateQuote(QuoteCalculationInput input)
 
     return RedirectToAction(nameof(Details), new {id = input.PrintRequestId});
 }
+
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> SendEmailQuote(int requestId)
+{
+    var quote = await _db.PrintQuotes.Include(q => q.PrintRequest).FirstOrDefaultAsync(q => q.PrintRequestId == requestId);
+
+    if (quote == null || quote.PrintRequest == null)
+    {
+        return NotFound();
+    }
+
+    //replace this with my existing stripe checkout url genereation logic if I have one
+    string stripeCheckoutUrl = Url.Action(
+        "Checkout",
+        "Cart",
+        new { quoteId = quote.Id },
+        Request.Scheme
+    ) ?? string.Empty;
+
+    await _emailService.SendEmailAsync(quote.PrintRequest, quote, stripeCheckoutUrl);
+
+    quote.PrintRequest.Status = QuoteStatus.QuoteSent;
+    await _db.SaveChangesAsync();
+
+    //var emailService = new EmailService();
+    //await emailService.SendQuoteEmailAsync(request.CustomerEmail, request.Quote);
+
+    TempData["SuccessMessage"] = $"Quote sent to {quote.PrintRequest.CustomerEmail}!";
+    return RedirectToAction(nameof(Details), new { id = requestId });
+}
+
 }
