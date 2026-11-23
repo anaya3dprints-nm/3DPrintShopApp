@@ -28,7 +28,9 @@
                     <input asp-for="CustomerEmail" class="form-control" />
                     <span asp-validation-for="CustomerEmail" class="text-danger"></span>
                 </div>
-
+                <div class="alert alert-info">
+                <strong>Size:</strong> 3D model cannot exceed 256mm in any dimension.
+                </div>
                 <div class="mb-3">
                     <label asp-for="ProjectDescription" class="form-label">
                         Describe Your Project
@@ -46,7 +48,7 @@
                 <div class="mb-3">
                     <label asp-for="RequestedColorsCount"
                            class="form-label">
-                        Number of Colors
+                        Number of Colors (4 colors max)
                     </label>
 
                     <input asp-for="RequestedColorsCount"
