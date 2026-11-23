@@ -49,8 +49,8 @@ namespace ThreeDPrintStore.Services
 
             using var client = new SmtpClient();
             await client.ConnectAsync(
-                _configuration["EmailSettings:SmtpServer"] ?? "", 
-                int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "587"), 
+                _configuration["EmailSettings:Host"] ?? "", 
+                int.Parse(_configuration["EmailSettings:Port"] ?? "587"), 
                 MailKit.Security.SecureSocketOptions.StartTls
             );
             

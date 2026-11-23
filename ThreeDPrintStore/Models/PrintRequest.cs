@@ -1,6 +1,8 @@
 
 using ThreeDPrintStore.Models; // Or wherever QuoteStatus is defined
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace ThreeDPrintStore.Models
 {
@@ -32,5 +34,9 @@ namespace ThreeDPrintStore.Models
 		public QuoteStatus Status { get; set; } = QuoteStatus.PendingReview;
 		
 		public PrintQuote? Quote { get; set; }
+		public string? ReferenceImagePath { get; set; }
+
+		[NotMapped]
+		public IFormFile? ReferenceImage { get; set; }
 	}
 }

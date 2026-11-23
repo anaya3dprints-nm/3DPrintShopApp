@@ -61,7 +61,14 @@
                     name="modelFile"
                     class="form-control"
                     accept=".stl,.3mf,.obj" />
-            </div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="ReferenceImage" class="form-label">Upload Reference Image (Optional)</label>
+                    <input asp-for="ReferenceImage" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/*" />
+                    <div class="form-text">Accepted formats: JPG, PNG, WebP</div>
+                    <span asp-validation-for="ReferenceImage" class="text-danger"></span>
+                </div>
+
 
                 <button type="submit"
                         class="btn btn-primary">

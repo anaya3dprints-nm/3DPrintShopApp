@@ -95,6 +95,9 @@ namespace ThreeDPrintStore.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ReferenceImagePath")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("RequestedColorsCount")
                         .HasColumnType("INTEGER");
 

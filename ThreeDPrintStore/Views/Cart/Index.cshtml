@@ -1,14 +1,8 @@
 @model List<CartItem>
 
 @{
-    decimal subtotal =
-        Model.Sum(x => x.Price * x.Quantity);
-
-    decimal shipping =
-        subtotal >= 25 ? 0 : 2;
-
-    decimal total =
-        subtotal + shipping;
+    decimal subtotal = Model.Sum(x => x.Price * x.Quantity);
+    decimal freeShippingThreshold = 50m;
 }
 
 <h1>Your Cart</h1>
@@ -22,27 +16,70 @@
             <th>Total</th>
         </tr>
     </thead>
-
     <tbody>
-
-    @foreach(var item in Model)
-    {
-        <tr>
-            <td>@item.Name</td>
-            <td>@item.Quantity</td>
-            <td>$@item.Price</td>
-            <td>$@(item.Price * item.Quantity)</td>
-        </tr>
-    }
-
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Quantity</td>
+                <td>$@item.Price.ToString("F2")</td>
+                <td>$@((item.Price * item.Quantity).ToString("F2"))</td>
+            </tr>
+        }
     </tbody>
-
 </table>
 
-<h4>Subtotal:  @Model.Sum(i => i.Price * i.Quantity).ToString("C")</h4>
-
-<p class="text-muted">Shipping calculated at checkout.</p>
-
 <form asp-controller="Cart" asp-action="Checkout" method="post">
+    
+    <!-- Premium Cache Drop Add-On -->
+    <div class="card mb-3 p-3 border-primary">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="includeCacheDrop" name="includeCacheDrop" value="true" onchange="updateCartTotal()">
+            <label class="form-check-label fw-bold text-primary" for="includeCacheDrop">
+                Add Premium Cache Drop (+$5.00)
+            </label>
+        </div>
+        <small class="text-muted">
+            Sponsor a hidden 3-inch community 3D model, get a copy with your order, and receive a social media shout-out.
+        </small>
+    </div>
+
+    <!-- Live Subtotal & Free Shipping Status -->
+    <h4>Subtotal: $<span id="display-subtotal" data-base-subtotal="@subtotal">@subtotal.ToString("F2")</span></h4>
+
+    <p id="free-shipping-msg" class="fw-bold @(subtotal >= freeShippingThreshold ? "text-success" : "text-muted")">
+        @if (subtotal >= freeShippingThreshold)
+        {
+            <span>You qualify for Free Shipping!</span>
+        }
+        else
+        {
+            <span>Add $@((freeShippingThreshold - subtotal).ToString("F2")) more for Free Shipping (calculated at checkout).</span>
+        }
+    </p>
+
     <button type="submit" class="btn btn-primary btn-lg">Proceed to Checkout</button>
 </form>
+
+<script>
+    function updateCartTotal() {
+        const checkbox = document.getElementById('includeCacheDrop');
+        const subtotalEl = document.getElementById('display-subtotal');
+        const msgEl = document.getElementById('free-shipping-msg');
+
+        const baseSubtotal = parseFloat(subtotalEl.getAttribute('data-base-subtotal'));
+        const addOn = checkbox.checked ? 5.00 : 0.00;
+        const newSubtotal = baseSubtotal + addOn;
+
+        subtotalEl.textContent = newSubtotal.toFixed(2);
+
+        if (newSubtotal >= 50.00) {
+            msgEl.textContent = "You qualify for Free Shipping!";
+            msgEl.className = "fw-bold text-success";
+        } else {
+            const remaining = (50.00 - newSubtotal).toFixed(2);
+            msgEl.textContent = `Add $${remaining} more for Free Shipping (calculated at checkout).`;
+            msgEl.className = "fw-bold text-muted";
+        }
+    }
+</script>
