@@ -39,6 +39,33 @@
                 Add Premium Cache Drop (+$5.00)
             </label>
         </div>
+        <div id="premiumFields" style="display:none;">
+
+    <div class="mb-3">
+        <label class="form-label">
+            Sponsor Name
+        </label>
+        <input class="form-control"
+               name="SponsorName" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Social Media Handle
+        </label>
+        <input class="form-control"
+               name="SocialHandle" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Message
+        </label>
+        <textarea class="form-control"
+                  name="SponsorMessage"></textarea>
+    </div>
+
+</div>
         <small class="text-muted">
             Sponsor a hidden 3-inch community 3D model, get a copy with your order, and receive a social media shout-out.
         </small>
@@ -82,4 +109,16 @@
             msgEl.className = "fw-bold text-muted";
         }
     }
+</script>
+
+<script>
+
+document.getElementById('premiumCache')
+    .addEventListener('change', function () {
+
+        document.getElementById('premiumFields')
+            .style.display =
+                this.checked ? 'block' : 'none';
+    });
+
 </script>

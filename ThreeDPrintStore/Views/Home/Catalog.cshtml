@@ -25,12 +25,13 @@
                     </p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
                         
-                    <form asp-controller="Cart" asp-action="Add" method="post">
-                        <input type="hidden" name="productId" value="1" />
-                        <input type="hidden" name="name" value="La Llorona Duck" />
-                        <input type="hidden" name="price" value="5" />
-                        <button type="submit" class="btn btn-sm btn-primary px-3">Add To Cart</button>
-                    </form>
+                    <button type="button"
+                        class="btn btn-sm btn-primary px-3 add-cart-btn"
+                        data-product-id="1"
+                        data-name="La Llorona Duck"
+                        data-price="5">
+                    Add To Cart
+                </button>
                 
                     </div>
                 </div>
@@ -51,12 +52,13 @@
                     </p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
                         
-                    <form asp-controller="Cart" asp-action="Add" method="post">
-                        <input type="hidden" name="productId" value="2" />
-                        <input type="hidden" name="name" value="Roswell Alien Duck" />
-                        <input type="hidden" name="price" value="5" />
-                        <button type="submit" class="btn btn-sm btn-primary px-3">Add To Cart</button>
-                    </form>
+                    <button type="button"
+                        class="btn btn-sm btn-primary px-3 add-cart-btn"
+                        data-product-id="2"
+                        data-name="Roswell Alien Duck"
+                        data-price="5">
+                    Add To Cart
+                </button>
                         
                     </div>
                 </div>
@@ -77,13 +79,13 @@
                     </p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
                      
-                        <form asp-controller="Cart" asp-action="Add" method="post">
-                        <input type="hidden" name="productId" value="3" />
-                        <input type="hidden" name="name" value="Green Chile Duck" />
-                        <input type="hidden" name="price" value="5" />
-                        <button type="submit" class="btn btn-sm btn-primary px-3">Add To Cart</button>
-                    </form>
-                        
+                     <button type="button"
+                class="btn btn-sm btn-primary px-3 add-cart-btn"
+                data-product-id="3"
+                data-name="Green Chile Duck"
+                data-price="5">
+            Add To Cart
+        </button>   
                     </div>
                 </div>
             </div>
@@ -103,12 +105,13 @@
                     </p>
                     <div class="d-flex justify-content-between align-items-center mt-3">
                        
-                    <form asp-controller="Cart" asp-action="Add" method="post">
-                        <input type="hidden" name="productId" value="4" />
-                        <input type="hidden" name="name" value="Red Chile Duck" />
-                        <input type="hidden" name="price" value="5" />
-                        <button type="submit" class="btn btn-sm btn-primary px-3">Add To Cart</button>
-                    </form>
+                    <button type="button"
+                            class="btn btn-sm btn-primary px-3 add-cart-btn"
+                            data-product-id="4"
+                            data-name="Red Chile Duck"
+                            data-price="5">
+                        Add To Cart
+                    </button>
                        
                     </div>
                 </div>
@@ -128,4 +131,49 @@
     }
 </style>
 
+}
+
+@section Scripts {
+<script>
+
+document.querySelectorAll('.add-cart-btn')
+    .forEach(button => {
+
+    button.addEventListener('click', async function () {
+
+        const formData = new FormData();
+
+        formData.append(
+            'productId',
+            this.dataset.productId);
+
+        formData.append(
+            'name',
+            this.dataset.name);
+
+        formData.append(
+            'price',
+            this.dataset.price);
+
+        const response = await fetch(
+            '/Cart/AddAjax',
+            {
+                method: 'POST',
+                body: formData
+            });
+
+        const result = await response.json();
+
+        if (result.success) {
+
+            document.getElementById('cart-count')
+                .textContent = result.cartCount;
+
+            alert('Added to cart!');
+        }
+    });
+
+});
+
+</script>
 }

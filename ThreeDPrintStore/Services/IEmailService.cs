@@ -6,5 +6,6 @@ namespace ThreeDPrintStore.Services
     public interface IEmailService
     {
         public Task SendEmailAsync(PrintRequest request, PrintQuote quote, string stripeCheckoutUrl); //SendQuoteEmailAsync
+        public Task SendSubmissionConfirmationAsync(PrintRequest request);
     }
 }

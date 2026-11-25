@@ -96,7 +96,7 @@ public class QuoteController : Controller
 
         _db.PrintRequests.Add(request);
         _db.SaveChanges();
-
+        await _emailService.SendSubmissionConfirmationAsync(request);
         return RedirectToAction(nameof(ThankYou));
     }
 

@@ -8,7 +8,7 @@ namespace ThreeDPrintStore.Controllers;
 public class CartController : Controller
 {
     [HttpPost]
-    public IActionResult Add(
+    public IActionResult AddAjax(
         int productId,
         string name,
         decimal price)
@@ -44,7 +44,12 @@ public class CartController : Controller
             "Cart",
             JsonSerializer.Serialize(cart));
 
-        return Redirect(Request.Headers["Referer"].ToString());
+        //return Redirect(Request.Headers["Referer"].ToString());
+        return Json(new
+        {
+            success = true,
+            cartCount = cart.Sum(x => x.Quantity)
+        });
     }
 
     public IActionResult Index()
@@ -78,6 +83,7 @@ var cartJson = HttpContext.Session.GetString("Cart");
 
     // Calculate subtotal
     var subtotal = cart.Sum(i => i.Price * i.Quantity);
+
 
     // Build Stripe line items
     var lineItems = cart.Select(item => new SessionLineItemOptions

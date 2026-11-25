@@ -62,5 +62,45 @@ namespace ThreeDPrintStore.Services
             await client.SendAsync(message);
             await client.DisconnectAsync(true);
         }
+
+        public async Task SendSubmissionConfirmationAsync(PrintRequest request)
+        {
+            var message = new MimeMessage();
+
+            message.From.Add(new MailboxAddress(
+                "Anaya 3D Prints",
+                _configuration["EmailSettings:SenderEmail"] ?? ""));
+
+            message.To.Add(new MailboxAddress(
+                request.CustomerName,
+                request.CustomerEmail));
+
+            message.Subject = "We Received Your 3D Print Request";
+
+            message.Body = new TextPart("html")
+            {
+                Text = $@"
+                    <h2>Thank You, {request.CustomerName}!</h2>
+                    <p>We have received your custom 3D print request.</p>
+                    <p>I will review the details and send you a quote as soon as possible.</p>
+                "
+            };
+
+            using var client = new SmtpClient();
+
+            await client.ConnectAsync(
+                _configuration["EmailSettings:Host"] ?? "",
+                int.Parse(_configuration["EmailSettings:Port"] ?? "587"),
+                MailKit.Security.SecureSocketOptions.StartTls);
+
+            await client.AuthenticateAsync(
+                _configuration["EmailSettings:Username"] ?? "",
+                _configuration["EmailSettings:Password"] ?? "");
+
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
+
+           
+        }
     }
 }
