@@ -46,7 +46,7 @@
             Sponsor Name
         </label>
         <input class="form-control"
-               name="SponsorName" />
+               name="SponsorName" maxlength="100" />
     </div>
 
     <div class="mb-3">
@@ -54,7 +54,7 @@
             Social Media Handle
         </label>
         <input class="form-control"
-               name="SocialHandle" />
+               name="SocialHandle" maxlength="100" />
     </div>
 
     <div class="mb-3">
@@ -62,7 +62,7 @@
             Message
         </label>
         <textarea class="form-control"
-                  name="SponsorMessage"></textarea>
+                  name="SponsorMessage" maxlength="500"></textarea>
     </div>
 
 </div>
@@ -72,7 +72,7 @@
     </div>
 
     <!-- Live Subtotal & Free Shipping Status -->
-    <h4>Subtotal: $<span id="display-subtotal" data-base-subtotal="@subtotal">@subtotal.ToString("F2")</span></h4>
+    <h4>Subtotal: $<span id="display-subtotal" data-base-subtotal="@subtotal.ToString(System.Globalization.CultureInfo.InvariantCulture)">@subtotal.ToString("F2")</span></h4>
 
     <p id="free-shipping-msg" class="fw-bold @(subtotal >= freeShippingThreshold ? "text-success" : "text-muted")">
         @if (subtotal >= freeShippingThreshold)
@@ -94,6 +94,8 @@
         const subtotalEl = document.getElementById('display-subtotal');
         const msgEl = document.getElementById('free-shipping-msg');
 
+        document.getElementById('premiumFields').style.display = checkbox.checked ? 'block' : 'none';
+
         const baseSubtotal = parseFloat(subtotalEl.getAttribute('data-base-subtotal'));
         const addOn = checkbox.checked ? 5.00 : 0.00;
         const newSubtotal = baseSubtotal + addOn;
@@ -109,16 +111,4 @@
             msgEl.className = "fw-bold text-muted";
         }
     }
-</script>
-
-<script>
-
-document.getElementById('premiumCache')
-    .addEventListener('change', function () {
-
-        document.getElementById('premiumFields')
-            .style.display =
-                this.checked ? 'block' : 'none';
-    });
-
 </script>

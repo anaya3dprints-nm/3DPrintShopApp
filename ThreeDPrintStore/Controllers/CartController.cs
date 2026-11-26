@@ -67,8 +67,15 @@ public class CartController : Controller
     }
 
     [HttpPost]
-    public IActionResult Checkout()
+    public IActionResult Checkout(bool includeCacheDrop, string? sponsorName, string? socialHandle, string? sponsorMessage)
     {
+    if (includeCacheDrop &&
+        ((sponsorName?.Length ?? 0) > 100 ||
+         (socialHandle?.Length ?? 0) > 100 ||
+         (sponsorMessage?.Length ?? 0) > 500))
+    {
+        return BadRequest("Premium Cache Drop details are too long.");
+    }
         
 var cartJson = HttpContext.Session.GetString("Cart");
 
@@ -100,6 +107,25 @@ var cartJson = HttpContext.Session.GetString("Cart");
 
         Quantity = item.Quantity
     }).ToList();
+
+    if (includeCacheDrop)
+    {
+        const decimal cacheDropPrice = 5m;
+        subtotal += cacheDropPrice;
+        lineItems.Add(new SessionLineItemOptions
+        {
+            PriceData = new SessionLineItemPriceDataOptions
+            {
+                Currency = "usd",
+                UnitAmount = (long)(cacheDropPrice * 100),
+                ProductData = new SessionLineItemPriceDataProductDataOptions
+                {
+                    Name = "Premium Cache Drop"
+                }
+            },
+            Quantity = 1
+        });
+    }
 
     // Shipping options
     List<SessionShippingOptionOptions> shippingOptions;
@@ -192,6 +218,20 @@ var cartJson = HttpContext.Session.GetString("Cart");
             null,
             Request.Scheme)
     };
+
+    if (includeCacheDrop)
+    {
+        options.Metadata = new Dictionary<string, string>
+        {
+            ["premium_cache_drop"] = "true"
+        };
+        if (!string.IsNullOrWhiteSpace(sponsorName))
+            options.Metadata["sponsor_name"] = sponsorName.Trim();
+        if (!string.IsNullOrWhiteSpace(socialHandle))
+            options.Metadata["social_handle"] = socialHandle.Trim();
+        if (!string.IsNullOrWhiteSpace(sponsorMessage))
+            options.Metadata["sponsor_message"] = sponsorMessage.Trim();
+    }
 
     var service = new SessionService();
     Session session = service.Create(options);
