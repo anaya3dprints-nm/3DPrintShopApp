@@ -67,6 +67,7 @@ public class CartController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult Checkout(bool includeCacheDrop, string? sponsorName, string? socialHandle, string? sponsorMessage)
     {
     if (includeCacheDrop &&
