@@ -1,0 +1,42 @@
+@{
+    Layout = null;
+}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Preparing your cart</title>
+</head>
+<body>
+    <main>
+        <h1>Preparing your cart</h1>
+        <p id="status" role="status">Please wait while your cart is initialized.</p>
+        <noscript>JavaScript and cookies are required to use the cart.</noscript>
+    </main>
+    <script>
+        (async () => {
+            const status = document.getElementById("status");
+            try {
+                if (!window.isSecureContext || !navigator.locks) throw new Error();
+                await navigator.locks.request("ThreeDPrintStore.CartInitialization.v1", async () => {
+                    const options = {
+                        method: "POST",
+                        credentials: "same-origin",
+                        cache: "no-store",
+                        redirect: "error",
+                        headers: { "X-Cart-Initialization": "1" }
+                    };
+                    const initialized = await fetch("@Url.Action("Initialize", "Cart")", options);
+                    if (!initialized.ok) throw new Error();
+                    const verified = await fetch("@Url.Action("InitializationStatus", "Cart")", options);
+                    if (!verified.ok) throw new Error();
+                    window.location.reload();
+                });
+            } catch {
+                status.textContent = "The cart could not be initialized. Use a supported browser with cookies and Web Locks enabled, then reload this page.";
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -96,14 +96,9 @@ public class CartController : Controller
     public async Task<IActionResult> Index()
     {
         var identity = Request.Cookies[CartCookie];
-        if (!ValidToken(identity))
-        {
-            identity = Hash("ThreeDPrintStore.CartIdentity.v1:" + HttpContext.Session.Id);
-            if (HttpContext.Session.GetString("Cart") == null &&
-                HttpContext.Session.GetString("CartIdentityInitialized") == null)
-                HttpContext.Session.SetString("CartIdentityInitialized", "1");
-            SetCartCookie(identity);
-        }
+        Response.Headers.CacheControl = "no-store";
+        if (!ValidToken(identity) || !HttpContext.Session.Keys.Any())
+            return View("Bootstrap");
         var cartKey = Hash(identity!);
         var attempt = NewToken();
         var cart = ReadCart();
@@ -111,8 +106,35 @@ public class CartController : Controller
         ViewData["CartBinding"] = CartProtector.Protect(cartKey + ":" + attempt + ":" + CartFingerprint(cart));
         ViewData["CanStartNewOrder"] = await _db.Orders.AsNoTracking()
             .AnyAsync(o => o.ActiveCartKey == cartKey && o.Status != OrderStatus.PendingPayment);
-        Response.Headers.CacheControl = "no-store";
         return View(cart);
+    }
+
+    private bool IsInitializationRequest() =>
+        Request.Headers["Sec-Fetch-Site"] == "same-origin" &&
+        Request.Headers["X-Cart-Initialization"] == "1";
+
+    [HttpPost]
+    public IActionResult Initialize()
+    {
+        Response.Headers.CacheControl = "no-store";
+        if (!IsInitializationRequest()) return BadRequest();
+        var identity = Request.Cookies[CartCookie];
+        if (identity != null && !ValidToken(identity)) return Conflict();
+        if (identity == null)
+            SetCartCookie(Hash("ThreeDPrintStore.CartIdentity.v1:" + HttpContext.Session.Id));
+        if (!HttpContext.Session.Keys.Any())
+            HttpContext.Session.SetString("CartIdentityInitialized", "1");
+        return NoContent();
+    }
+
+    [HttpPost]
+    public IActionResult InitializationStatus()
+    {
+        Response.Headers.CacheControl = "no-store";
+        if (!IsInitializationRequest()) return BadRequest();
+        if (!ValidToken(Request.Cookies[CartCookie]) || !HttpContext.Session.Keys.Any())
+            return Conflict();
+        return NoContent();
     }
 
     [HttpPost, ValidateAntiForgeryToken]

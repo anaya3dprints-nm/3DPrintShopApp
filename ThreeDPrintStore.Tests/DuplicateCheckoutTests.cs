@@ -79,6 +79,7 @@ public class DuplicateCheckoutTests
             BaseAddress = new Uri("https://localhost"), AllowAutoRedirect = false, HandleCookies = false
         });
         var cookies = new Dictionary<string, string>();
+        await InitializeWithCookies(client, cookies);
         var initial = await SendWithCookies(client, HttpMethod.Get, "/Cart/Index", cookies);
         initial.EnsureSuccessStatusCode();
         ApplyCookies(cookies, initial);
@@ -88,9 +89,20 @@ public class DuplicateCheckoutTests
         Assert.Equal(HttpStatusCode.OK, added.StatusCode);
         ApplyCookies(cookies, added);
         Assert.Contains(cookies.Keys, name => name.Contains("Session", StringComparison.OrdinalIgnoreCase));
+        var oldIdentity = cookies["StoreCartIdentity"];
         cookies.Remove("StoreCartIdentity");
 
         var pages = await Task.WhenAll(
+            SendWithCookies(client, HttpMethod.Get, "/Cart/Index", cookies),
+            SendWithCookies(client, HttpMethod.Get, "/Cart/Index", cookies));
+        foreach (var page in pages)
+        {
+            Assert.DoesNotContain("Set-Cookie", page.Headers.Select(h => h.Key));
+            Assert.Contains("navigator.locks", await page.Content.ReadAsStringAsync());
+        }
+        await InitializeWithCookies(client, cookies);
+        Assert.Equal(oldIdentity, cookies["StoreCartIdentity"]);
+        pages = await Task.WhenAll(
             SendWithCookies(client, HttpMethod.Get, "/Cart/Index", cookies),
             SendWithCookies(client, HttpMethod.Get, "/Cart/Index", cookies));
         var forms = new List<(Dictionary<string, string> Cookies, string Csrf, CheckoutAttempt Attempt)>();
@@ -116,6 +128,74 @@ public class DuplicateCheckoutTests
         Assert.Single(stripe.CreatedKeys.Distinct());
         using var scope = factory.Services.CreateScope();
         Assert.Single(await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Orders.ToListAsync());
+    }
+
+    [Fact]
+    public async Task Delayed_cookieless_first_views_cannot_overwrite_paid_successor_identity()
+    {
+        using var stripe = new FakeStripe();
+        using var factory = stripe.Factory();
+        factory.HoldFirstCartGet = true;
+        factory.InitializeDatabase();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("https://localhost"),
+            AllowAutoRedirect = false,
+            HandleCookies = false
+        });
+        var cookies = new Dictionary<string, string>();
+        var delayed = SendWithCookies(client, HttpMethod.Get, "/Cart/Index", cookies);
+        await factory.FirstCartGetEntered.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        try
+        {
+            var firstView = await SendWithCookies(client, HttpMethod.Get, "/Cart/Index", cookies);
+            Assert.Equal(HttpStatusCode.OK, firstView.StatusCode);
+            Assert.False(firstView.Headers.Contains("Set-Cookie"));
+            Assert.Contains("navigator.locks", await firstView.Content.ReadAsStringAsync());
+
+            await InitializeWithCookies(client, cookies);
+            var identity = cookies["StoreCartIdentity"];
+            var page = await SendWithCookies(client, HttpMethod.Get, "/Cart/Index", cookies);
+            ApplyCookies(cookies, page);
+            var csrf = Field(await page.Content.ReadAsStringAsync(), "__RequestVerificationToken");
+            var add = await SendWithCookies(client, HttpMethod.Post, "/Cart/AddAjax", cookies,
+                HttpTestHelpers.Form(csrf, ("productId", "1")));
+            Assert.Equal(HttpStatusCode.OK, add.StatusCode);
+            ApplyCookies(cookies, add);
+            page = await SendWithCookies(client, HttpMethod.Get, "/Cart/Index", cookies);
+            var html = await page.Content.ReadAsStringAsync();
+            var attempt = new CheckoutAttempt(Field(html, "checkoutAttempt"), Field(html, "cartBinding"));
+            var checkout = await SendWithCookies(client, HttpMethod.Post, "/Cart/Checkout", cookies,
+                HttpTestHelpers.Form(csrf, ("checkoutAttempt", attempt.Token), ("cartBinding", attempt.CartBinding)));
+            Assert.Equal(HttpStatusCode.Redirect, checkout.StatusCode);
+            Order order;
+            using (var scope = factory.Services.CreateScope())
+                order = await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Orders.AsNoTracking().SingleAsync();
+            Assert.Equal(HttpStatusCode.OK, (await SendPaidWebhook(client, order)).StatusCode);
+            var rotate = await SendWithCookies(client, HttpMethod.Post, "/Cart/StartNewOrder", cookies,
+                HttpTestHelpers.Form(csrf, ("checkoutAttempt", attempt.Token), ("cartBinding", attempt.CartBinding)));
+            Assert.Equal(HttpStatusCode.Redirect, rotate.StatusCode);
+            ApplyCookies(cookies, rotate);
+            Assert.NotEqual(identity, cookies["StoreCartIdentity"]);
+            var successor = cookies["StoreCartIdentity"];
+
+            // Release a genuinely delayed cookie-less first response after rotation.
+            factory.ReleaseFirstCartGet.TrySetResult();
+            var delayedResponse = await delayed;
+            Assert.False(delayedResponse.Headers.Contains("Set-Cookie"));
+            Assert.Contains("navigator.locks", await delayedResponse.Content.ReadAsStringAsync());
+            ApplyCookies(cookies, delayedResponse);
+            await InitializeWithCookies(client, cookies);
+            Assert.Equal(successor, cookies["StoreCartIdentity"]);
+            page = await SendWithCookies(client, HttpMethod.Get, "/Cart/Index", cookies);
+            html = await page.Content.ReadAsStringAsync();
+            var next = new CheckoutAttempt(Field(html, "checkoutAttempt"), Field(html, "cartBinding"));
+            checkout = await SendWithCookies(client, HttpMethod.Post, "/Cart/Checkout", cookies,
+                HttpTestHelpers.Form(csrf, ("checkoutAttempt", next.Token), ("cartBinding", next.CartBinding)));
+            Assert.Equal(HttpStatusCode.Redirect, checkout.StatusCode);
+            Assert.Equal(2, stripe.CreatedKeys.Distinct().Count());
+        }
+        finally { factory.ReleaseFirstCartGet.TrySetResult(); }
     }
 
     [Fact]
@@ -384,6 +464,20 @@ public class DuplicateCheckoutTests
         {
             var pair = header.Split(';', 2)[0].Split('=', 2);
             cookies[pair[0]] = pair[1];
+        }
+    }
+
+    private static async Task InitializeWithCookies(HttpClient client, Dictionary<string, string> cookies)
+    {
+        foreach (var path in new[] { "/Cart/Initialize", "/Cart/InitializationStatus" })
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, path);
+            request.Headers.TryAddWithoutValidation("Cookie", string.Join("; ", cookies.Select(c => $"{c.Key}={c.Value}")));
+            request.Headers.Add("Sec-Fetch-Site", "same-origin");
+            request.Headers.Add("X-Cart-Initialization", "1");
+            using var response = await client.SendAsync(request);
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            ApplyCookies(cookies, response);
         }
     }
 

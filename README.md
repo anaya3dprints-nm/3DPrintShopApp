@@ -49,8 +49,22 @@ After payment is confirmed, starting another order requires an explicit action.
 This protection depends on a persistent browser cookie and does not prevent
 duplicate purchases from another browser or device, or after cookies are cleared.
 HTTPS and persistent ASP.NET Core data-protection keys are required.
-Simultaneous first visits without established session cookies can also create
-independent carts; wait for the store to load before opening additional tabs.
+On the first cart visit, a cookie-free page uses the browser Web Locks API to
+serialize initialization across cooperating tabs on the same origin. It checks
+that the identity and session cookies were accepted before loading the cart.
+JavaScript, cookies, HTTPS, and a browser supporting Web Locks are required;
+initialization fails closed otherwise. This coordination does not cover separate
+browser profiles, isolated storage partitions, non-cooperating clients, cookies
+cleared during initialization, or all races in ordinary session cart mutations.
+Do not treat it as protection against duplicate purchases across those boundaries.
+Initialization does not rewrite a populated session, but starting a new or
+expired session concurrently with cart changes outside this flow can still race;
+avoid cart mutations until initialization completes.
+Initialization retains the previous session-derived identity when an existing
+session survives without its identity cookie. Before deploying this change,
+drain old application instances and in-flight responses: the old cart page can
+still set an identity cookie, so an old delayed response could overwrite a
+newer identity. Reconcile open checkouts if that cannot be guaranteed.
 
 If a checkout's creation outcome cannot be resolved within Stripe's
 idempotency window, checkout remains unavailable rather than risking a second
