@@ -41,7 +41,10 @@
 </table>
 
 <form asp-controller="Cart" asp-action="Checkout" method="post">
+    <input type="hidden" name="checkoutAttempt" value="@ViewData["CheckoutAttempt"]" />
+    <input type="hidden" name="cartBinding" value="@ViewData["CartBinding"]" />
     <p>US shipping only. Local delivery is not currently available.</p>
+    <p>A checkout already in progress must finish or expire before changing this order. Returning from Stripe does not cancel it.</p>
     
     <!-- Premium Cache Drop Add-On -->
     <div class="card mb-3 p-3 border-primary">
@@ -99,6 +102,16 @@
 
     <button type="submit" class="btn btn-primary btn-lg" disabled="@(Model.Count == 0)">Proceed to Checkout</button>
 </form>
+
+@if ((bool)(ViewData["CanStartNewOrder"] ?? false))
+{
+    <p>Payment for the previous order was confirmed. To buy again, explicitly start a new order.</p>
+    <form asp-controller="Cart" asp-action="StartNewOrder" method="post">
+        <input type="hidden" name="checkoutAttempt" value="@ViewData["CheckoutAttempt"]" />
+        <input type="hidden" name="cartBinding" value="@ViewData["CartBinding"]" />
+        <button type="submit" class="btn btn-secondary">Start a new order</button>
+    </form>
+}
 
 <script>
     function updateCartTotal() {

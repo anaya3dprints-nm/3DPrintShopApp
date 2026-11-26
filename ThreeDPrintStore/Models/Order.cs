@@ -15,6 +15,10 @@ public class Order
     [MaxLength(3)] public string Currency { get; set; } = "usd";
     [MaxLength(255)] public string? StripeSessionId { get; set; }
     [MaxLength(64)] public string CheckoutToken { get; set; } = "";
+    [MaxLength(64)] public string? ActiveCartKey { get; set; }
+    [MaxLength(64)] public string? CartKey { get; set; }
+    [MaxLength(500)] public string? CheckoutOrigin { get; set; }
+    [MaxLength(500)] public string? NextCartIdentity { get; set; }
     [MaxLength(255)] public string? StripePaymentIntentId { get; set; }
     [MaxLength(255)] public string? CustomerEmail { get; set; }
     [MaxLength(255)] public string? ShippingName { get; set; }
@@ -26,6 +30,14 @@ public class Order
     [MaxLength(255)] public string? TrackingNumber { get; set; }
     public List<OrderItem> Items { get; set; } = new();
     public List<OrderNotification> Notifications { get; set; } = new();
+    public List<CheckoutSubmission> CheckoutSubmissions { get; set; } = new();
+}
+
+public class CheckoutSubmission
+{
+    [MaxLength(64)] public string Token { get; set; } = "";
+    public int OrderId { get; set; }
+    public Order Order { get; set; } = null!;
 }
 
 public class OrderItem

@@ -27,6 +27,7 @@ public sealed class StoreFactory : WebApplicationFactory<CartController>
     public const string Password = "test-only-password";
     private readonly string _dataDirectory = Path.Combine(AppContext.BaseDirectory, "test-data", Guid.NewGuid().ToString("N"));
     public List<SessionCreateOptions> CheckoutRequests { get; } = new();
+    public bool UseStripeTransport { get; set; }
     public RecordingEmailService EmailService { get; } = new();
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -54,7 +55,7 @@ public sealed class StoreFactory : WebApplicationFactory<CartController>
                     provider.GetRequiredService<ApplicationDbContext>(),
                     provider.GetRequiredService<IConfiguration>(),
                     provider.GetRequiredService<IWebHostEnvironment>(),
-                    provider.GetRequiredService<ILogger<CartController>>(), CheckoutRequests)));
+                    provider.GetRequiredService<ILogger<CartController>>(), this)));
         });
     }
 
@@ -91,14 +92,26 @@ public sealed class StoreFactory : WebApplicationFactory<CartController>
 
     private sealed class FakeCartController(
         ApplicationDbContext db, IConfiguration configuration, IWebHostEnvironment environment,
-        ILogger<CartController> logger, List<SessionCreateOptions> requests)
+        ILogger<CartController> logger, StoreFactory factory)
         : CartController(db, configuration, environment, logger)
     {
         protected override Task<Session> CreateSessionAsync(SessionCreateOptions options, int orderId)
         {
-            requests.Add(options);
-            return Task.FromResult(new Session { Id = $"cs_test_{orderId}", Url = "https://checkout.example/session" });
+            if (factory.UseStripeTransport) return base.CreateSessionAsync(options, orderId);
+            lock (factory.CheckoutRequests) factory.CheckoutRequests.Add(options);
+            return Task.FromResult(new Session
+            {
+                Id = $"cs_test_{orderId}", Url = "https://checkout.example/session",
+                Status = "open", PaymentStatus = "unpaid"
+            });
         }
+
+        protected override Task<Session> GetSessionAsync(string sessionId) =>
+            factory.UseStripeTransport ? base.GetSessionAsync(sessionId) :
+            Task.FromResult(new Session
+            {
+                Id = sessionId, Url = "https://checkout.example/session", Status = "open", PaymentStatus = "unpaid"
+            });
     }
 }
 

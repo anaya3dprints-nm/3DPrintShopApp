@@ -17,11 +17,39 @@ namespace ThreeDPrintStore.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.11");
 
+            modelBuilder.Entity("ThreeDPrintStore.Models.CheckoutSubmission", b =>
+                {
+                    b.Property<string>("Token")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Token");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("CheckoutSubmissions");
+                });
+
             modelBuilder.Entity("ThreeDPrintStore.Models.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ActiveCartKey")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CartKey")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CheckoutOrigin")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("CheckoutToken")
                         .IsRequired()
@@ -38,6 +66,10 @@ namespace ThreeDPrintStore.Migrations
 
                     b.Property<string>("CustomerEmail")
                         .HasMaxLength(255)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NextCartIdentity")
+                        .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("PremiumCacheDrop")
@@ -88,6 +120,9 @@ namespace ThreeDPrintStore.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ActiveCartKey")
+                        .IsUnique();
 
                     b.HasIndex("StripeSessionId")
                         .IsUnique();
@@ -261,6 +296,17 @@ namespace ThreeDPrintStore.Migrations
                     b.ToTable("PrintRequests");
                 });
 
+            modelBuilder.Entity("ThreeDPrintStore.Models.CheckoutSubmission", b =>
+                {
+                    b.HasOne("ThreeDPrintStore.Models.Order", "Order")
+                        .WithMany("CheckoutSubmissions")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("ThreeDPrintStore.Models.OrderItem", b =>
                 {
                     b.HasOne("ThreeDPrintStore.Models.Order", null)
@@ -294,6 +340,8 @@ namespace ThreeDPrintStore.Migrations
 
             modelBuilder.Entity("ThreeDPrintStore.Models.Order", b =>
                 {
+                    b.Navigation("CheckoutSubmissions");
+
                     b.Navigation("Items");
 
                     b.Navigation("Notifications");

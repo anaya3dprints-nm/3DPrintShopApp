@@ -44,9 +44,18 @@ window, and quote shipping has not been specified. Reconcile any previously
 issued payment links or open sessions in Stripe before re-enabling this flow.
 The discounted local-delivery option is also unavailable until address
 eligibility can be reliably verified; standard US shipping remains available.
-Repeated cart checkout submissions can create separate payable sessions and
-orders. Reconcile payment activity and avoid repeated submissions until durable
-checkout-attempt deduplication is implemented.
+Cart checkout reuses an open payment session for the same browser and order.
+After payment is confirmed, starting another order requires an explicit action.
+This protection depends on a persistent browser cookie and does not prevent
+duplicate purchases from another browser or device, or after cookies are cleared.
+HTTPS and persistent ASP.NET Core data-protection keys are required.
+
+If a checkout's creation outcome cannot be resolved within Stripe's
+idempotency window, checkout remains unavailable rather than risking a second
+payment. Investigate and reconcile the order and Stripe activity before taking
+manual action. Sessions created before the checkout-protection migration cannot
+be linked to the new browser identity: reconcile outstanding payments and
+sessions before deployment.
 
 ## Data protection and backups
 

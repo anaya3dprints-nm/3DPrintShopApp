@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using ThreeDPrintStore.Data;
@@ -13,6 +14,7 @@ public class CartTests
     {
         using var factory = new StoreFactory();
         using var client = factory.CreateStoreClient();
+        factory.InitializeDatabase();
         var token = await HttpTestHelpers.AntiforgeryToken(client, "/Cart/Index");
         Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsync("/Cart/AddAjax", new FormUrlEncodedContent(
             new Dictionary<string, string> { ["productId"] = "2" }))).StatusCode);
@@ -47,8 +49,16 @@ public class CartTests
         var token = await HttpTestHelpers.AntiforgeryToken(client, "/Cart/Index");
         await client.PostAsync("/Cart/AddAjax", HttpTestHelpers.Form(token, ("productId", "1"), ("price", "0.01")));
         await client.PostAsync("/Cart/Update", HttpTestHelpers.Form(token, ("productId", "1"), ("quantity", quantity.ToString())));
+        var cartHtml = await client.GetStringAsync("/Cart/Index");
+        static string Field(string html, string name)
+        {
+            var match = Regex.Match(html, $"name=\"{name}\"[^>]*value=\"([^\"]+)\"");
+            Assert.True(match.Success, $"Missing {name} field");
+            return WebUtility.HtmlDecode(match.Groups[1].Value);
+        }
         var response = await client.PostAsync("/Cart/Checkout", HttpTestHelpers.Form(token,
-            ("includeCacheDrop", addon.ToString()), ("sponsorName", "  Sponsor  ")));
+            ("includeCacheDrop", addon.ToString()), ("sponsorName", "  Sponsor  "),
+            ("checkoutAttempt", Field(cartHtml, "checkoutAttempt")), ("cartBinding", Field(cartHtml, "cartBinding"))));
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         Assert.Equal("https://checkout.example/session", response.Headers.Location?.OriginalString);
 
