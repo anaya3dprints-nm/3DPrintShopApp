@@ -49,6 +49,8 @@ After payment is confirmed, starting another order requires an explicit action.
 This protection depends on a persistent browser cookie and does not prevent
 duplicate purchases from another browser or device, or after cookies are cleared.
 HTTPS and persistent ASP.NET Core data-protection keys are required.
+Simultaneous first visits without established session cookies can also create
+independent carts; wait for the store to load before opening additional tabs.
 
 If a checkout's creation outcome cannot be resolved within Stripe's
 idempotency window, checkout remains unavailable rather than risking a second
