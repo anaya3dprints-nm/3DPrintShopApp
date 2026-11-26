@@ -44,10 +44,18 @@
             @Model.Status
         </p>
 
+        @if (!string.IsNullOrEmpty(Model.FilePath))
+        {
+            <p><a asp-action="Download" asp-route-id="@Model.Id">Download model</a></p>
+        }
+        @if (!string.IsNullOrEmpty(Model.ReferenceImagePath))
+        {
+            <p><a asp-action="Download" asp-route-id="@Model.Id" asp-route-reference="true">Download reference image</a></p>
+        }
     </div>
 </div>
 
-@if (Model.Quote == null)
+@if (Model.Quote == null && Model.Status == ThreeDPrintStore.Models.QuoteStatus.PendingReview)
 {
     <div class="card mb-4">
         <div class="card-header">
@@ -85,26 +93,13 @@
                         <label class="form-label">Base Handling Fee ($)</label>
                         <input type="number" step="0.01" name="BaseHandlingFee" value="3.00" class="form-control" required />
                     </div>
-                    @if (!string.IsNullOrEmpty(Model.ReferenceImagePath))
-                    {
-                        <div class="mb-3">
-                            <h5>Customer Reference Image</h5>
-                            <a href="@Model.ReferenceImagePath" target="_blank" rel="noopener noreferrer">
-                                <img src="@Model.ReferenceImagePath"
-                                    alt="Customer Reference Image"
-                                    class="img-thumbnail"
-                                    style="max-height: 300px; width: auto;" />
-                            </a>
-                            <div class="form-text">Click image to open full size in a new tab</div>
-                        </div>
-                    }
                     </div> 
                 <button type="submit" class="btn btn-success">Generate Quote</button>
             </form>
         </div>
     </div>
 }
-else
+else if (Model.Quote != null)
 {
     <div class="card mb-4 border-success">
         <div class="card-header bg-success text-white">
@@ -129,8 +124,8 @@ else
     Back to Requests
 </a>
 
-<form asp-controller="Quote" asp-action="SendEmailQuote" method="post">
-    <input type="hidden" name="requestId" value="@Model.Id" />
-    <button type="submit" class="btn btn-primary">Send Quote to Customer</button>
-</form>
+@if (Model.Quote != null && (Model.Status == ThreeDPrintStore.Models.QuoteStatus.PendingReview || Model.Status == ThreeDPrintStore.Models.QuoteStatus.QuoteSent))
+{
+<p class="text-warning">Quote payment and payment-link emails are temporarily unavailable.</p>
+}
 </div>

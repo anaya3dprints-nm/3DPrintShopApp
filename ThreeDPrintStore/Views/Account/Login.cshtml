@@ -1,0 +1,19 @@
+@model ThreeDPrintStore.Controllers.AdminLoginModel
+@{
+    ViewData["Title"] = "Admin login";
+}
+
+<h1>Admin login</h1>
+<form asp-action="Login" method="post">
+    <div asp-validation-summary="All" role="alert"></div>
+    <input asp-for="ReturnUrl" type="hidden" />
+    <div>
+        <label asp-for="Username"></label>
+        <input asp-for="Username" autocomplete="username" />
+    </div>
+    <div>
+        <label asp-for="Password"></label>
+        <input asp-for="Password" autocomplete="current-password" />
+    </div>
+    <button type="submit">Sign in</button>
+</form>

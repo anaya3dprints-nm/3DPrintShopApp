@@ -21,7 +21,18 @@
         {
             <tr>
                 <td>@item.Name</td>
-                <td>@item.Quantity</td>
+                <td>
+                    <form asp-action="Update" method="post">
+                        <input type="hidden" name="productId" value="@item.ProductId" />
+                        <label>Quantity <input type="number" name="quantity" value="@item.Quantity" min="0" max="@ProductCatalog.Find(item.ProductId)!.MaxQuantity" /></label>
+                        <button type="submit">Update</button>
+                    </form>
+                    <form asp-action="Update" method="post">
+                        <input type="hidden" name="productId" value="@item.ProductId" />
+                        <input type="hidden" name="quantity" value="0" />
+                        <button type="submit">Remove</button>
+                    </form>
+                </td>
                 <td>$@item.Price.ToString("F2")</td>
                 <td>$@((item.Price * item.Quantity).ToString("F2"))</td>
             </tr>
@@ -30,6 +41,7 @@
 </table>
 
 <form asp-controller="Cart" asp-action="Checkout" method="post">
+    <p>US shipping only. Local delivery is not currently available.</p>
     
     <!-- Premium Cache Drop Add-On -->
     <div class="card mb-3 p-3 border-primary">
@@ -85,7 +97,7 @@
         }
     </p>
 
-    <button type="submit" class="btn btn-primary btn-lg">Proceed to Checkout</button>
+    <button type="submit" class="btn btn-primary btn-lg" disabled="@(Model.Count == 0)">Proceed to Checkout</button>
 </form>
 
 <script>

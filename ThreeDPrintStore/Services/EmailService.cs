@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using MailKit.Net.Smtp;
 using MimeKit;
 using ThreeDPrintStore.Models;
+using System.Text.Encodings.Web;
 
 namespace ThreeDPrintStore.Services
 {
@@ -25,7 +26,7 @@ namespace ThreeDPrintStore.Services
             var bodyBuilder = new BodyBuilder
             {
                 HtmlBody = $@"
-                    <h2>Hello {request.CustomerName},</h2>
+                    <h2>Hello {HtmlEncoder.Default.Encode(request.CustomerName)},</h2>
                     <p>We've reviewed your 3D printing request and calculated your final quote based on your file specifications.</p>
                     
                     <h3>Pricing Breakdown:</h3>
@@ -39,7 +40,7 @@ namespace ThreeDPrintStore.Services
                     <h3>Total Price: ${quote.FinalTotalPrice:N2}</h3>
                     
                     <p>Ready to move forward? Click the link below to securely complete your payment via Stripe and kick off production:</p>
-                    <p><a href='{stripeCheckoutUrl}' style='background: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Pay Now & Start Printing</a></p>
+                    <p><a href='{HtmlEncoder.Default.Encode(stripeCheckoutUrl)}' style='background: #4F46E5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Pay Now & Start Printing</a></p>
                     
                     <p>Thank you for choosing Anaya 3D Prints!</p>
                 "
@@ -80,7 +81,7 @@ namespace ThreeDPrintStore.Services
             message.Body = new TextPart("html")
             {
                 Text = $@"
-                    <h2>Thank You, {request.CustomerName}!</h2>
+                    <h2>Thank You, {HtmlEncoder.Default.Encode(request.CustomerName)}!</h2>
                     <p>We have received your custom 3D print request.</p>
                     <p>I will review the details and send you a quote as soon as possible.</p>
                 "

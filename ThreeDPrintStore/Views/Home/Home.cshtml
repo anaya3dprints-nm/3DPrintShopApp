@@ -28,53 +28,24 @@
 
 <div class="container my-5">
     <div class="text-center mb-5">
-        <h2 class="fw-bold">Choose Your Delivery Adventure</h2>
-        <p class="text-muted fs-5">Whether you are a local in the Duke City or shopping from afar, we have a delivery path for you.</p>
+        <h2 class="fw-bold">Shipping and Orders</h2>
+        <p class="text-muted fs-5">See shipping options at checkout and contact us with questions about your order.</p>
     </div>
 
     <div class="row g-4 justify-content-center">
-        <!-- Card 1: Standard Shipping -->
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card shadow-sm border-0 bg-light">
                 <div class="card-body p-4">
-                    <div class="mb-3">
-                        <span class="badge bg-secondary px-3 py-2 rounded-pill fs-7">Outside Albuquerque</span>
-                    </div>
                     <h3 class="card-title h4 fw-bold mb-3">📦 Standard Shipping</h3>
                     <p class="card-text text-muted">
-                        Not in Albuquerque or Rio Rancho? No worries. Shipping costs are automatically calculated by Stripe during checkout based on the delivery address you enter.
+                        USPS shipping is a flat $8.95. Orders with a subtotal of $50 or more qualify for free shipping.
                     </p>
-                    <div class="mt-4">
-                         <span class="text-dark fw-bold">✅ Free shipping on all orders over $50</span>
-                        <span class="text-dark fw-bold">Shipping Rate: Calculated at Checkout</span>
-                    </div>
+                    <a asp-controller="Home" asp-action="Shipping">Shipping information</a>
                 </div>
             </div>
         </div>
 
-        <!-- Card 2: Free Local Delivery -->
-        <div class="col-md-4">
-            <div class="card shadow-sm border-2 border-success">
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <span class="badge bg-success px-3 py-2 rounded-pill fs-7">ABQ & Rio Rancho Residents</span>
-                    </div>
-                    <h3 class="card-title h4 fw-bold text-success mb-3">🚚 Local Shipping Special</h3>
-                    <p class="card-text text-muted">
-                        Customers located in Albuquerque or Rio Rancho can enjoy a flat $2 shipping fee on any order, making local delivery simple and affordable.
-                    </p>
-                    <p class="card-text text-muted">
-                        For all other cities and states, shipping costs will be determined automatically by Stripe at checkout based on your address.
-                    </p>
-                    <div class="mt-4">
-                        <span class="text-success fw-bold fs-5">Local Rate: $2 Flat Shipping</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Card 3: Premium Cache Drop -->
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card shadow border-2 border-primary">
                 <div class="card-body p-4">
                     <div class="mb-3">
@@ -85,22 +56,9 @@
                         Want to leave your mark on the community treasure hunt? Add the Premium Cache Drop to your order for just $5.
                     </p>
                     <p class="card-text text-muted">
-                       With this optional upgrade, you can sponsor a hidden community model and choose the design that gets placed out in the wild.
+                        Contact us for details about the optional community cache drop before ordering.
                     </p>
-                    <div class="premium-features">
-                    <h4>What's Included:</h4>
-
-                    <ul>
-                        <li>Your choice of one 3D model to be hidden in the community</li>
-                        <li>Maximum size: <strong>3 inches</strong></li>
-                        <li>Includes <strong>one color</strong></li>
-                        <li>Multi-color models are available for an additional charge</li>
-                        <li>You receive your regular order <strong>plus a copy of the sponsored model</strong></li>
-                        <li>Your sponsored model will be hidden in the community by me</li>
-                        <li>You'll receive a social media shout-out when I post location hints for the cache drop</li>
-                    </ul>
-                </div>
-                                    <div class="mt-4">
+                    <div class="mt-4">
                         <span class="text-primary fw-bold fs-5">Add-On Cost: +$5</span>
                     </div>
                 </div>
@@ -109,7 +67,19 @@
     </div>
 </div>
 
-           
+<section class="container my-5" aria-labelledby="policy-heading">
+    <h2 id="policy-heading">Store information</h2>
+    <nav aria-label="Store policies">
+        <ul>
+            <li><a asp-controller="Home" asp-action="Shipping">Shipping information</a></li>
+            <li><a asp-controller="Home" asp-action="Refund">Refund information</a></li>
+            <li><a asp-controller="Home" asp-action="Privacy">Privacy information</a></li>
+            <li><a asp-controller="Home" asp-action="Cookies">Cookie information</a></li>
+            <li><a asp-controller="Home" asp-action="Terms">Terms information</a></li>
+        </ul>
+    </nav>
+    <p>Questions? Email <a href="mailto:anaya3dprints@gmail.com">anaya3dprints@gmail.com</a>.</p>
+</section>
 
 <section class="container my-5">
     <h2 class="text-center mb-4">Upcoming Fun National Holidays</h2>
@@ -146,7 +116,7 @@
 
                </div>  
                 <p class="text-muted mt-3">
-                    A themed 3D print for these holidays will be hidden on the day of or day after. A 3D print for every holiday not gaurenteed.
+                    Themed 3D prints may be hidden around these holidays; a print for every holiday is not guaranteed.
                 </p>
                 <p class="text-muted mt-3">
                     Follow my TikTok for hints! <a href="https://www.tiktok.com/@@anaya3dprints" target="_blank" rel="noopener noreferrer">Anaya 3D Prints</a>
@@ -159,4 +129,3 @@
        
     }
 </section>
-

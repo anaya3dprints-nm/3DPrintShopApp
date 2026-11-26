@@ -45,6 +45,13 @@ namespace ThreeDPrintStore.Controllers
         {
             return View();
         }
+
+        public IActionResult Privacy() => View();
+        public IActionResult Refund() => View();
+        public IActionResult Shipping() => View();
+        public IActionResult Terms() => View();
+        public IActionResult Cookies() => View();
+
         //load national holiday JSON file
         public List<NationalDay> GetNationalDays()
         {

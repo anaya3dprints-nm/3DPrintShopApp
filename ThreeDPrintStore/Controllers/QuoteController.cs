@@ -1,222 +1,139 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ThreeDPrintStore.Data;
 using ThreeDPrintStore.Models;
 using ThreeDPrintStore.Services;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-using Stripe.Checkout;
-using System.IO;
 
 public class QuoteController : Controller
 {
     private readonly ApplicationDbContext _db;
-    private readonly IQuoteService _quoteService;
     private readonly IEmailService _emailService;
+    private readonly IWebHostEnvironment _environment;
+    private readonly ILogger<QuoteController> _logger;
 
-    public QuoteController(ApplicationDbContext db, IQuoteService quoteService, IEmailService emailService)
+    public QuoteController(ApplicationDbContext db, IEmailService emailService, IWebHostEnvironment environment,
+        ILogger<QuoteController> logger)
     {
         _db = db;
-        _quoteService = quoteService;
         _emailService = emailService;
+        _environment = environment;
+        _logger = logger;
     }
 
-    public IActionResult AdminRequests()
-    {
-        var requests = _db.PrintRequests
-                      .OrderByDescending(r => r.SubmittedAt)
-                      .ToList();
-
-        return View(requests);
-    }
-
+    [Authorize(Policy = "Admin")]
+    public async Task<IActionResult> AdminRequests() =>
+        View(await _db.PrintRequests.OrderByDescending(r => r.SubmittedAt).ToListAsync());
 
     [HttpGet]
-    public IActionResult RequestForm()
-    {
-        return View();
-    }
+    public IActionResult RequestForm() => View(new PrintRequestInput());
 
     [HttpPost]
-    public async Task<IActionResult> RequestForm(PrintRequest request, IFormFile modelFile)
+    [ValidateAntiForgeryToken]
+    [RequestSizeLimit(PrivateUploadStore.RequestLimit)]
+    public async Task<IActionResult> RequestForm(PrintRequestInput input, CancellationToken cancellationToken)
     {
-        request.MaterialType = "PLA";
-        if (modelFile != null)
+        if (!ModelState.IsValid) return View(input);
+        PrintRequest request;
+        try
         {
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            
-            Directory.CreateDirectory(uploadsFolder); 
-            
-            var fileName = Guid.NewGuid() + Path.GetExtension(modelFile.FileName);
-
-            var filePath = Path.Combine(uploadsFolder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await modelFile.CopyToAsync(stream);
-            }
-
-            request.FilePath = fileName;
+            request = await new PrintRequestSubmission(_db, _environment).SaveAsync(input, cancellationToken);
         }
-
-        //add reference image here
-        if (request.ReferenceImage != null && request.ReferenceImage.Length > 0)
+        catch (InvalidDataException ex)
         {
-            var allowedExtensions = new[] {".jpg", ".jpeg", ".png", ".webp" };
-            var extension = Path.GetExtension(request.ReferenceImage.FileName).ToLowerInvariant();
-
-            if (!allowedExtensions.Contains(extension))
-            {
-                ModelState.AddModelError("ReferenceImage", "Only JPG, PNG, and WebP images are allowed.");
-            }
-            else if (request.ReferenceImage.Length > 5 * 1024 * 1024)
-            {
-                ModelState.AddModelError("ReferenceImage", "Image size must be under 5 MB.");
-            }
-            else
-            {
-                var refFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "references");
-                Directory.CreateDirectory(refFolder);
-
-                var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-                var refFilePath = Path.Combine(refFolder, uniqueFileName);
-
-                using (var stream = new FileStream(refFilePath, FileMode.Create))
-                {
-                    await request.ReferenceImage.CopyToAsync(stream);
-                }
-
-                request.ReferenceImagePath = $"/uploads/references/{uniqueFileName}";
-            }
+            ModelState.AddModelError("", ex.Message);
+            return View(input);
         }
-
-        if (!ModelState.IsValid)
-        {
-            return View(request);
-        }
-
-        _db.PrintRequests.Add(request);
-        _db.SaveChanges();
-        await _emailService.SendSubmissionConfirmationAsync(request);
+        try { await _emailService.SendSubmissionConfirmationAsync(request); }
+        catch (Exception ex) { _logger.LogError(ex, "Submission confirmation failed for request {RequestId}", request.Id); }
         return RedirectToAction(nameof(ThankYou));
     }
 
-    public IActionResult ThankYou()
+    [HttpGet]
+    public IActionResult ThankYou() => View();
+
+    [Authorize(Policy = "Admin")]
+    [HttpGet]
+    public async Task<IActionResult> Details(int id)
     {
-        return View();
+        var request = await _db.PrintRequests.Include(r => r.Quote).FirstOrDefaultAsync(r => r.Id == id);
+        return request == null ? NotFound() : View(request);
     }
 
-
-public async Task<IActionResult> Details(int id)
-{
-   var request = await _db.PrintRequests.Include(r => r.Quote).FirstOrDefaultAsync(r => r.Id == id);
-
-   if (request == null)
+    [Authorize(Policy = "Admin")]
+    [HttpGet]
+    public async Task<IActionResult> Download(int id, bool reference = false)
     {
-         return NotFound();
-    }
-    return View(request);
-}
-
-[HttpPost]
-[ValidateAntiForgeryToken]
-public IActionResult GenerateQuote(QuoteCalculationInput input)
-{
-    if (!ModelState.IsValid)
-    {
-        return RedirectToAction(nameof(Details), new { id = input.PrintRequestId });
+        var request = await _db.PrintRequests.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
+        if (request == null) return NotFound();
+        var path = new PrivateUploadStore(_environment).Find(reference ? request.ReferenceImagePath : request.FilePath, reference);
+        if (path == null) return NotFound();
+        Response.Headers.XContentTypeOptions = "nosniff";
+        Response.Headers.CacheControl = "private, no-store";
+        return PhysicalFile(path, "application/octet-stream", Path.GetFileName(path));
     }
 
-    
-    var quote = _quoteService.CalculateAndSaveQuote(input);
-
-    return RedirectToAction(nameof(Details), new {id = input.PrintRequestId});
-}
-
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> SendEmailQuote(int requestId)
-{
-    var quote = await _db.PrintQuotes.Include(q => q.PrintRequest).FirstOrDefaultAsync(q => q.PrintRequestId == requestId);
-
-    if (quote == null || quote.PrintRequest == null)
+    [Authorize(Policy = "Admin")]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> GenerateQuote(QuoteCalculationInput input)
     {
-        return NotFound();
+        if (!ModelState.IsValid || input.PrintRequestId <= 0 || input.ColorCount is < 1 or > 4
+            || input.FilamentGrams is <= 0 or > 100000 || input.EstimatedPrintHours is <= 0 or > 10000
+            || input.MaterialCostPerGram is < 0 or > 10000 || input.HourlyMachineRate is < 0 or > 10000
+            || input.MultiColorFeePerColor is < 0 or > 10000 || input.BaseHandlingFee is < 0 or > 10000)
+            return BadRequest("Invalid quote inputs.");
+        var request = await _db.PrintRequests.Include(r => r.Quote).FirstOrDefaultAsync(r => r.Id == input.PrintRequestId);
+        if (request == null) return NotFound();
+        if (request.Status != QuoteStatus.PendingReview || request.Quote != null || input.ColorCount != request.RequestedColorsCount)
+            return Conflict("This request cannot be quoted.");
+
+        var material = input.FilamentGrams * input.MaterialCostPerGram;
+        var labor = input.EstimatedPrintHours * input.HourlyMachineRate;
+        var colors = (input.ColorCount - 1) * input.MultiColorFeePerColor;
+        var total = Math.Round(material + labor + colors + input.BaseHandlingFee, 2, MidpointRounding.AwayFromZero);
+        if (total < 0.50m || total > 999999.99m) return BadRequest("Quote total is outside the supported range.");
+        _db.PrintQuotes.Add(new PrintQuote
+        {
+            PrintRequestId = request.Id, FilamentGrams = input.FilamentGrams, EstimatedPrintHours = input.EstimatedPrintHours,
+            ColorCount = input.ColorCount, MaterialCostPerGram = input.MaterialCostPerGram, MaterialSubtotal = material,
+            LaborMachineSubtotal = labor, MultiColorSurcharge = colors, BaseHandlingFee = input.BaseHandlingFee,
+            FinalTotalPrice = total, CalculatedAt = DateTime.UtcNow
+        });
+        try { await _db.SaveChangesAsync(); }
+        catch (DbUpdateException)
+        {
+            if (await _db.PrintQuotes.AsNoTracking().AnyAsync(q => q.PrintRequestId == request.Id))
+                return Conflict("A quote already exists.");
+            throw;
+        }
+        return RedirectToAction(nameof(Details), new { id = request.Id });
     }
 
-    //replace this with my existing stripe checkout url genereation logic if I have one
-    string stripeCheckoutUrl = Url.Action(
-        action: "PayQuote",
-        controller: "Quote",
-        values: new { quoteId = quote.Id },
-        protocol: Request.Scheme
-    ) ?? string.Empty;
-
-    await _emailService.SendEmailAsync(quote.PrintRequest, quote, stripeCheckoutUrl);
-
-    quote.PrintRequest.Status = QuoteStatus.QuoteSent;
-    await _db.SaveChangesAsync();
-
-    //var emailService = new EmailService();
-    //await emailService.SendQuoteEmailAsync(request.CustomerEmail, request.Quote);
-
-    TempData["SuccessMessage"] = $"Quote sent to {quote.PrintRequest.CustomerEmail}!";
-    return RedirectToAction(nameof(Details), new { id = requestId });
-}
+    [Authorize(Policy = "Admin")]
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult SendEmailQuote(int requestId)
+    {
+        return QuotePaymentUnavailable();
+    }
 
     [HttpGet]
-    public async Task<IActionResult> PayQuote(int quoteId)
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public IActionResult PayQuote(string? token)
     {
-        var quote = await _db.PrintQuotes
-            .Include(q => q.PrintRequest)
-            .FirstOrDefaultAsync(q => q.Id == quoteId);
-
-        if (quote == null) return NotFound();
-
-        //prevent double payment
-        if (quote.PrintRequest?.Status == QuoteStatus.Paid)
-        {
-            return RedirectToAction("QuoteAlreadyPaid");
-        }
-
-        var domain = $"{Request.Scheme}://{Request.Host}";
-
-        var options = new Stripe.Checkout.SessionCreateOptions
-        {
-            AllowedPaymentMethodTypes = new List<string> { "card" },
-            CustomerEmail = quote.PrintRequest?.CustomerEmail,
-            LineItems = new List<Stripe.Checkout.SessionLineItemOptions>
-            {
-                new Stripe.Checkout.SessionLineItemOptions
-                {
-                    PriceData = new Stripe.Checkout.SessionLineItemPriceDataOptions
-                    {
-                        UnitAmount = (long)Math.Round(quote.FinalTotalPrice * 100),
-                        Currency = "usd",
-                        ProductData = new Stripe.Checkout.SessionLineItemPriceDataProductDataOptions
-                        {
-                            Name = $"Custom 3D Print Quote #{quote.Id}",
-                            Description = $"{quote.PrintRequest?.MaterialType} | {quote.PrintRequest?.RequestedColorsCount} color(s)"
-                        }
-                    },
-                    Quantity = 1
-                }
-            },
-            Mode = "payment",
-            Metadata = new Dictionary<string, string>
-            {
-                { "quote_id", quote.Id.ToString() },
-                { "request_id", quote.PrintRequestId.ToString() }
-            },
-            SuccessUrl = $"{domain}/Quote/PaymentSuccess?session_id={{CHECKOUT_SESSION_ID}}",
-            CancelUrl = $"{domain}/Quote/PaymentCancelled?id={quote.Id}"
-        };
-
-        var service = new Stripe.Checkout.SessionService();
-        var session = await service.CreateAsync(options);
-
-        string stripeCheckoutUrl = session.Url;
-        return Redirect(stripeCheckoutUrl); 
+        Response.Headers["Referrer-Policy"] = "no-referrer";
+        return QuotePaymentUnavailable();
     }
 
-    
+    [HttpGet] public IActionResult PaymentSuccess() => View();
+    [HttpGet] public IActionResult PaymentCancelled() => View();
+    [HttpGet] public IActionResult QuoteAlreadyPaid() => View();
+
+    private IActionResult QuotePaymentUnavailable()
+    {
+        Response.Headers.CacheControl = "no-store";
+        return StatusCode(StatusCodes.Status503ServiceUnavailable,
+            "Quote payment and payment-link emails are temporarily unavailable. Please contact the store.");
+    }
 }

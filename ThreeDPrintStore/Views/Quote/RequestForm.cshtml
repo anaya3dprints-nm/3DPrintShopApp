@@ -1,4 +1,4 @@
-@model ThreeDPrintStore.Models.PrintRequest
+@model ThreeDPrintStore.Models.PrintRequestInput
 
 @{
     ViewData["Title"] = "Custom 3D Print Request";
@@ -17,6 +17,7 @@
                   method="post"
                   enctype="multipart/form-data">
 
+                <div asp-validation-summary="All" class="text-danger"></div>
                 <div class="mb-3">
                     <label asp-for="CustomerName" class="form-label"></label>
                     <input asp-for="CustomerName" class="form-control" />
@@ -39,6 +40,7 @@
                     <textarea asp-for="ProjectDescription"
                               class="form-control"
                               rows="5"></textarea>
+                    <span asp-validation-for="ProjectDescription" class="text-danger"></span>
                 </div>
 
                 <div class="alert alert-info">
@@ -56,18 +58,20 @@
                            min="1"
                            max="4"
                            class="form-control" />
+                    <span asp-validation-for="RequestedColorsCount" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
                 <label class="form-label">Upload STL, 3MF, or OBJ File</label>
-                <input type="file"
-                    name="modelFile"
+                <input asp-for="ModelFile" type="file"
                     class="form-control"
                     accept=".stl,.3mf,.obj" />
+                <div class="form-text">Maximum model size: 25 MB.</div>
+                <span asp-validation-for="ModelFile" class="text-danger"></span>
                 </div>
                 <div class="mb-3">
                     <label asp-for="ReferenceImage" class="form-label">Upload Reference Image (Optional)</label>
-                    <input asp-for="ReferenceImage" type="file" name="modelFile" class="form-control" accept=".jpg,.jpeg,.png,.webp,image/*" />
-                    <div class="form-text">Accepted formats: JPG, PNG, WebP</div>
+                    <input asp-for="ReferenceImage" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+                    <div class="form-text">Accepted formats: JPG, PNG, WebP, up to 5 MB.</div>
                     <span asp-validation-for="ReferenceImage" class="text-danger"></span>
                 </div>
 
