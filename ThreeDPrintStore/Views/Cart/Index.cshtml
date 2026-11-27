@@ -21,7 +21,18 @@
         {
             <tr>
                 <td>@item.Name</td>
-                <td>@item.Quantity</td>
+                <td>
+                    <form asp-action="Update" method="post">
+                        <input type="hidden" name="productId" value="@item.ProductId" />
+                        <label>Quantity <input type="number" name="quantity" value="@item.Quantity" min="0" max="@ProductCatalog.Find(item.ProductId)!.MaxQuantity" /></label>
+                        <button type="submit">Update</button>
+                    </form>
+                    <form asp-action="Update" method="post">
+                        <input type="hidden" name="productId" value="@item.ProductId" />
+                        <input type="hidden" name="quantity" value="0" />
+                        <button type="submit">Remove</button>
+                    </form>
+                </td>
                 <td>$@item.Price.ToString("F2")</td>
                 <td>$@((item.Price * item.Quantity).ToString("F2"))</td>
             </tr>
@@ -30,6 +41,10 @@
 </table>
 
 <form asp-controller="Cart" asp-action="Checkout" method="post">
+    <input type="hidden" name="checkoutAttempt" value="@ViewData["CheckoutAttempt"]" />
+    <input type="hidden" name="cartBinding" value="@ViewData["CartBinding"]" />
+    <p>US shipping only. Local delivery is not currently available.</p>
+    <p>A checkout already in progress must finish or expire before changing this order. Returning from Stripe does not cancel it.</p>
     
     <!-- Premium Cache Drop Add-On -->
     <div class="card mb-3 p-3 border-primary">
@@ -46,7 +61,7 @@
             Sponsor Name
         </label>
         <input class="form-control"
-               name="SponsorName" />
+               name="SponsorName" maxlength="100" />
     </div>
 
     <div class="mb-3">
@@ -54,7 +69,7 @@
             Social Media Handle
         </label>
         <input class="form-control"
-               name="SocialHandle" />
+               name="SocialHandle" maxlength="100" />
     </div>
 
     <div class="mb-3">
@@ -62,7 +77,7 @@
             Message
         </label>
         <textarea class="form-control"
-                  name="SponsorMessage"></textarea>
+                  name="SponsorMessage" maxlength="500"></textarea>
     </div>
 
 </div>
@@ -72,7 +87,7 @@
     </div>
 
     <!-- Live Subtotal & Free Shipping Status -->
-    <h4>Subtotal: $<span id="display-subtotal" data-base-subtotal="@subtotal">@subtotal.ToString("F2")</span></h4>
+    <h4>Subtotal: $<span id="display-subtotal" data-base-subtotal="@subtotal.ToString(System.Globalization.CultureInfo.InvariantCulture)">@subtotal.ToString("F2")</span></h4>
 
     <p id="free-shipping-msg" class="fw-bold @(subtotal >= freeShippingThreshold ? "text-success" : "text-muted")">
         @if (subtotal >= freeShippingThreshold)
@@ -85,14 +100,26 @@
         }
     </p>
 
-    <button type="submit" class="btn btn-primary btn-lg">Proceed to Checkout</button>
+    <button type="submit" class="btn btn-primary btn-lg" disabled="@(Model.Count == 0)">Proceed to Checkout</button>
 </form>
+
+@if ((bool)(ViewData["CanStartNewOrder"] ?? false))
+{
+    <p>Payment for the previous order was confirmed. To buy again, explicitly start a new order.</p>
+    <form asp-controller="Cart" asp-action="StartNewOrder" method="post">
+        <input type="hidden" name="checkoutAttempt" value="@ViewData["CheckoutAttempt"]" />
+        <input type="hidden" name="cartBinding" value="@ViewData["CartBinding"]" />
+        <button type="submit" class="btn btn-secondary">Start a new order</button>
+    </form>
+}
 
 <script>
     function updateCartTotal() {
         const checkbox = document.getElementById('includeCacheDrop');
         const subtotalEl = document.getElementById('display-subtotal');
         const msgEl = document.getElementById('free-shipping-msg');
+
+        document.getElementById('premiumFields').style.display = checkbox.checked ? 'block' : 'none';
 
         const baseSubtotal = parseFloat(subtotalEl.getAttribute('data-base-subtotal'));
         const addOn = checkbox.checked ? 5.00 : 0.00;
@@ -109,16 +136,4 @@
             msgEl.className = "fw-bold text-muted";
         }
     }
-</script>
-
-<script>
-
-document.getElementById('premiumCache')
-    .addEventListener('change', function () {
-
-        document.getElementById('premiumFields')
-            .style.display =
-                this.checked ? 'block' : 'none';
-    });
-
 </script>

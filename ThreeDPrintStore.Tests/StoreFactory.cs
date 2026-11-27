@@ -1,0 +1,172 @@
+using System.Net;
+using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Hosting;
+using Stripe.Checkout;
+using ThreeDPrintStore.Controllers;
+using ThreeDPrintStore.Data;
+using ThreeDPrintStore.Models;
+using ThreeDPrintStore.Services;
+using Xunit;
+
+[assembly: WebApplicationFactoryContentRoot(
+    "ThreeDPrintStore, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+    "../../../../ThreeDPrintStore", "ThreeDPrintStore.csproj", "0")]
+
+namespace ThreeDPrintStore.Tests;
+
+public sealed class StoreFactory : WebApplicationFactory<CartController>
+{
+    public const string Username = "test-admin";
+    public const string Password = "test-only-password";
+    private readonly string _dataDirectory = Path.Combine(AppContext.BaseDirectory, "test-data", Guid.NewGuid().ToString("N"));
+    public List<SessionCreateOptions> CheckoutRequests { get; } = new();
+    public bool UseStripeTransport { get; set; }
+    public bool HoldFirstCartGet { get; set; }
+    public TaskCompletionSource FirstCartGetEntered { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    public TaskCompletionSource ReleaseFirstCartGet { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private int _heldCartGet;
+    public RecordingEmailService EmailService { get; } = new();
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        Directory.CreateDirectory(_dataDirectory);
+        builder.UseEnvironment("Development");
+        builder.ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["ConnectionStrings:DefaultConnection"] = $"Data Source={Path.Combine(_dataDirectory, "store.db")};Pooling=False",
+            ["Admin:Username"] = Username,
+            ["Admin:PasswordHash"] = new PasswordHasher<string>().HashPassword(Username, Password),
+            ["Store:PublicOrigin"] = "https://shop.example",
+            ["Stripe:WebhookSecret"] = "whsec_test_only"
+        }));
+        builder.ConfigureServices(services =>
+        {
+            services.AddSingleton<IStartupFilter>(new DelayCartFilter(this));
+            services.RemoveAll<IEmailService>();
+            services.AddSingleton<IEmailService>(EmailService);
+            foreach (var descriptor in services.Where(d => d.ServiceType == typeof(IHostedService)
+                         && d.ImplementationType == typeof(OrderNotificationWorker)).ToList())
+                services.Remove(descriptor);
+            services.AddControllersWithViews().AddControllersAsServices();
+            services.Replace(ServiceDescriptor.Transient<CartController>(provider =>
+                new FakeCartController(
+                    provider.GetRequiredService<ApplicationDbContext>(),
+                    provider.GetRequiredService<IConfiguration>(),
+                    provider.GetRequiredService<IWebHostEnvironment>(),
+                    provider.GetRequiredService<ILogger<CartController>>(), this)));
+        });
+    }
+
+    private sealed class DelayCartFilter(StoreFactory factory) : IStartupFilter
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
+        {
+            app.Use(async (context, continuation) =>
+            {
+                if (factory.HoldFirstCartGet && context.Request.Method == "GET" &&
+                    context.Request.Path.Equals("/Cart/Index", StringComparison.OrdinalIgnoreCase) &&
+                    Interlocked.Exchange(ref factory._heldCartGet, 1) == 0)
+                {
+                    factory.FirstCartGetEntered.TrySetResult();
+                    await factory.ReleaseFirstCartGet.Task.WaitAsync(context.RequestAborted);
+                }
+                await continuation();
+            });
+            next(app);
+        };
+    }
+
+    public HttpClient CreateStoreClient() => CreateClient(new WebApplicationFactoryClientOptions
+    {
+        BaseAddress = new Uri("https://localhost"),
+        AllowAutoRedirect = false,
+        HandleCookies = true
+    });
+
+    public void InitializeDatabase()
+    {
+        using var scope = Services.CreateScope();
+        scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.EnsureCreated();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        if (disposing && Directory.Exists(_dataDirectory))
+            Directory.Delete(_dataDirectory, recursive: true);
+    }
+
+    public sealed class RecordingEmailService : IEmailService
+    {
+        public int QuoteEmailsSent { get; private set; }
+        public Task SendEmailAsync(PrintRequest request, PrintQuote quote, string stripeCheckoutUrl)
+        {
+            QuoteEmailsSent++;
+            return Task.CompletedTask;
+        }
+        public Task SendSubmissionConfirmationAsync(PrintRequest request) => Task.CompletedTask;
+    }
+
+    private sealed class FakeCartController(
+        ApplicationDbContext db, IConfiguration configuration, IWebHostEnvironment environment,
+        ILogger<CartController> logger, StoreFactory factory)
+        : CartController(db, configuration, environment, logger)
+    {
+        protected override Task<Session> CreateSessionAsync(SessionCreateOptions options, int orderId)
+        {
+            if (factory.UseStripeTransport) return base.CreateSessionAsync(options, orderId);
+            lock (factory.CheckoutRequests) factory.CheckoutRequests.Add(options);
+            return Task.FromResult(new Session
+            {
+                Id = $"cs_test_{orderId}", Url = "https://checkout.example/session",
+                Status = "open", PaymentStatus = "unpaid"
+            });
+        }
+
+        protected override Task<Session> GetSessionAsync(string sessionId) =>
+            factory.UseStripeTransport ? base.GetSessionAsync(sessionId) :
+            Task.FromResult(new Session
+            {
+                Id = sessionId, Url = "https://checkout.example/session", Status = "open", PaymentStatus = "unpaid"
+            });
+    }
+}
+
+internal static class HttpTestHelpers
+{
+    public static async Task<string> AntiforgeryToken(HttpClient client, string path)
+    {
+        if (path.Equals("/Cart/Index", StringComparison.OrdinalIgnoreCase))
+            await InitializeCart(client);
+        var response = await client.GetAsync(path);
+        response.EnsureSuccessStatusCode();
+        var html = await response.Content.ReadAsStringAsync();
+        var match = Regex.Match(html, "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"");
+        Assert.True(match.Success, $"Antiforgery token not found on {path}");
+        return WebUtility.HtmlDecode(match.Groups[1].Value);
+    }
+
+    public static async Task InitializeCart(HttpClient client)
+    {
+        foreach (var path in new[] { "/Cart/Initialize", "/Cart/InitializationStatus" })
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, path);
+            request.Headers.Add("Sec-Fetch-Site", "same-origin");
+            request.Headers.Add("X-Cart-Initialization", "1");
+            using var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+        }
+    }
+
+    public static FormUrlEncodedContent Form(string token, params (string Key, string Value)[] fields) =>
+        new(fields.Append((Key: "__RequestVerificationToken", Value: token))
+            .Select(field => new KeyValuePair<string, string>(field.Key, field.Value)));
+}

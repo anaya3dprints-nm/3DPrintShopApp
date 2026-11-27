@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ThreeDPrintStore.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://jsdelivr.net"> 
 </head>
 <body>
     <header>
@@ -26,6 +25,20 @@
                 <li class="nav-item">
                     <a class="nav-link text-dark fw-semibold" asp-controller="Quote" asp-action="RequestForm">Custom Quote Request</a>
                 </li>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-controller="Quote" asp-action="AdminRequests">Print Requests</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" asp-controller="Order" asp-action="Index">Orders</a>
+                    </li>
+                    <li class="nav-item">
+                        <form asp-controller="Account" asp-action="Logout" method="post">
+                            <button type="submit" class="btn btn-link nav-link">Log out</button>
+                        </form>
+                    </li>
+                }
 
             </ul>
             <!-- Separated administrative layout gateway link -->
@@ -69,7 +82,13 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - Anaya 3D Print- <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2026 - Anaya 3D Print
+            <a asp-controller="Home" asp-action="Privacy">Privacy</a> |
+            <a asp-controller="Home" asp-action="Refund">Returns</a> |
+            <a asp-controller="Home" asp-action="Shipping">Shipping</a> |
+            <a asp-controller="Home" asp-action="Terms">Terms</a> |
+            <a href="mailto:anaya3dprints@gmail.com">Contact</a> |
+            <a asp-controller="Account" asp-action="Login">Admin login</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

@@ -2,4 +2,8 @@ bin/
 obj/
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
+App_Data/
+wwwroot/uploads/
 .DS_Store

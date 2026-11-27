@@ -1,0 +1,56 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "Orders";
+}
+<h1>Orders</h1>
+<p>Notifications are retried automatically; pending notifications can also be retried below.</p>
+@foreach (var order in Model)
+{
+    <section class="card p-3 mb-3">
+        <h2 class="h5">Order #@order.Id — @order.Status</h2>
+        <p>Created @order.CreatedAtUtc.ToString("u") · Total $@((order.TotalCents / 100m).ToString("F2")) · @order.Currency.ToUpperInvariant()</p>
+        <p>@order.CustomerEmail<br />@order.ShippingName<br />@order.ShippingAddress</p>
+        <ul>
+            @foreach (var item in order.Items)
+            {
+                <li>@item.Quantity × @item.Name ($@((item.UnitPriceCents / 100m).ToString("F2")) each)</li>
+            }
+        </ul>
+        @if (order.PremiumCacheDrop)
+        {
+            <p>Premium Cache Drop: @order.SponsorName · @order.SocialHandle · @order.SponsorMessage</p>
+        }
+        @if (order.Status == OrderStatus.Paid)
+        {
+            <form asp-action="Update" method="post">
+                <input type="hidden" name="id" value="@order.Id" />
+                <input type="hidden" name="status" value="InProduction" />
+                <button class="btn btn-primary" type="submit">Start production</button>
+            </form>
+        }
+        @if (order.Status == OrderStatus.InProduction)
+        {
+            <form asp-action="Update" method="post">
+                <input type="hidden" name="id" value="@order.Id" />
+                <input type="hidden" name="status" value="Shipped" />
+                <label>Tracking number <input name="trackingNumber" maxlength="255" required /></label>
+                <button class="btn btn-primary" type="submit">Mark shipped</button>
+            </form>
+        }
+        @if (order.Status == OrderStatus.Shipped) { <p>Tracking: @order.TrackingNumber</p> }
+        @foreach (var notification in order.Notifications)
+        {
+            <div>
+                @notification.Kind: @(notification.SentAtUtc == null ? "Pending" : "Sent") (attempts: @notification.Attempts)
+                @if (notification.LastError != null) { <span>@notification.LastError</span> }
+                @if (notification.SentAtUtc == null)
+                {
+                    <form asp-action="RetryNotification" method="post">
+                        <input type="hidden" name="id" value="@notification.Id" />
+                        <button type="submit">Send / retry</button>
+                    </form>
+                }
+            </div>
+        }
+    </section>
+}
