@@ -6,6 +6,10 @@ customer uploads.
 
 ## Before deployment
 
+- In Azure Portal, create a **Linux Web App** targeting .NET 10 on a Basic
+  App Service plan, after checking the price for your region. Use Deployment
+  Center to connect the GitHub repository and select the deployment branch.
+  Keep the app at one instance while it uses SQLite and in-memory sessions.
 - **Revoke and replace the previously committed Stripe test secret and SMTP
   password.** Removing them from configuration does not revoke them or remove
   them from Git history, existing clones, or cached deployments. Review account
@@ -29,6 +33,27 @@ customer uploads.
   `dotnet ef database update --project ThreeDPrintStore`. Set
   `ConnectionStrings__DefaultConnection` to the persistent database location.
   Test migrations and backups before applying them to a production database.
+- For Azure App Service on Linux, set `Store__DataDirectory` to
+  `/home/site/data` and ensure App Service persistent home storage is enabled.
+  The application creates the directory, places private uploads and
+  Data Protection keys there, and relocates a relative SQLite `Data Source`
+  there. An absolute SQLite path supplied through app settings is used as-is.
+  Persist and back up this data before accepting orders.
+- For a first Azure deployment, `Store__ApplyMigrationsOnStartup=true` applies
+  the EF Core migrations before the app begins serving requests. Use one app
+  instance, verify the migration and backups, then turn this setting off. For
+  local deployments, use `dotnet ef database update --project ThreeDPrintStore`.
+- In Azure App Service Configuration, add the app settings listed above,
+  including `Store__DataDirectory=/home/site/data`,
+  `Store__PublicOrigin=https://your-domain`, and a specific `AllowedHosts`
+  value. Add secrets in App Service settings (or a linked Key Vault), never
+  GitHub workflow files or the repository. After the app passes test-mode
+  checkout, add the custom domain in App Service and configure the Cloudflare
+  DNS record and HTTPS mode for that hostname.
+- Keep this SQLite/in-memory-session deployment to one App Service instance.
+  Cart sessions are in memory, and SQLite is not a suitable shared database for
+  a scaled-out web app. Use a distributed session store and a managed database
+  before scaling out.
 - Configure a Stripe webhook for `/api/webhook/stripe` and supply its signing
   secret. Set the endpoint's API version to the version expected by the
   installed Stripe SDK (`StripeConfiguration.ApiVersion`, currently

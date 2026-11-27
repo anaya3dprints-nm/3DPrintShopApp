@@ -12,9 +12,16 @@ public sealed class PrivateUploadStore
     private readonly string _privateRoot;
     private readonly string _legacyRoot;
 
-    public PrivateUploadStore(IWebHostEnvironment environment)
+    public PrivateUploadStore(IWebHostEnvironment environment, IConfiguration? configuration = null)
     {
-        _privateRoot = Path.Combine(environment.ContentRootPath, "App_Data", "Uploads");
+        var configuredRoot = configuration?["Store:DataDirectory"];
+        var root = !string.IsNullOrWhiteSpace(configuredRoot)
+            ? configuredRoot
+            : !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("WEBSITE_INSTANCE_ID")) &&
+              Environment.GetEnvironmentVariable("HOME") is { Length: > 0 } home
+                ? Path.Combine(home, "site", "data")
+                : Path.Combine(environment.ContentRootPath, "App_Data");
+        _privateRoot = Path.Combine(Path.GetFullPath(root), "Uploads");
         _legacyRoot = Path.Combine(environment.WebRootPath ?? Path.Combine(environment.ContentRootPath, "wwwroot"), "uploads");
     }
 

@@ -8,10 +8,10 @@ public sealed class PrintRequestSubmission
     private readonly ApplicationDbContext _db;
     private readonly PrivateUploadStore _uploads;
 
-    public PrintRequestSubmission(ApplicationDbContext db, IWebHostEnvironment environment)
+    public PrintRequestSubmission(ApplicationDbContext db, IWebHostEnvironment environment, IConfiguration configuration)
     {
         _db = db;
-        _uploads = new PrivateUploadStore(environment);
+        _uploads = new PrivateUploadStore(environment, configuration);
     }
 
     public async Task<PrintRequest> SaveAsync(PrintRequestInput input, CancellationToken cancellationToken)

@@ -10,14 +10,16 @@ public class QuoteController : Controller
     private readonly ApplicationDbContext _db;
     private readonly IEmailService _emailService;
     private readonly IWebHostEnvironment _environment;
+    private readonly IConfiguration _configuration;
     private readonly ILogger<QuoteController> _logger;
 
     public QuoteController(ApplicationDbContext db, IEmailService emailService, IWebHostEnvironment environment,
-        ILogger<QuoteController> logger)
+        IConfiguration configuration, ILogger<QuoteController> logger)
     {
         _db = db;
         _emailService = emailService;
         _environment = environment;
+        _configuration = configuration;
         _logger = logger;
     }
 
@@ -37,7 +39,7 @@ public class QuoteController : Controller
         PrintRequest request;
         try
         {
-            request = await new PrintRequestSubmission(_db, _environment).SaveAsync(input, cancellationToken);
+            request = await new PrintRequestSubmission(_db, _environment, _configuration).SaveAsync(input, cancellationToken);
         }
         catch (InvalidDataException ex)
         {
@@ -66,7 +68,7 @@ public class QuoteController : Controller
     {
         var request = await _db.PrintRequests.AsNoTracking().FirstOrDefaultAsync(r => r.Id == id);
         if (request == null) return NotFound();
-        var path = new PrivateUploadStore(_environment).Find(reference ? request.ReferenceImagePath : request.FilePath, reference);
+        var path = new PrivateUploadStore(_environment, _configuration).Find(reference ? request.ReferenceImagePath : request.FilePath, reference);
         if (path == null) return NotFound();
         Response.Headers.XContentTypeOptions = "nosniff";
         Response.Headers.CacheControl = "private, no-store";

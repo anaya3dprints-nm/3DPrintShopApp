@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Data.Sqlite;
 using System.Threading.RateLimiting;
 using ThreeDPrintStore.Models;
 using ThreeDPrintStore.Services;
@@ -12,6 +14,38 @@ if (args.Length == 1 && args[0] == "--generate-admin-password-hash")
 }
 
 var builder = WebApplication.CreateBuilder(args);
+
+var persistentDataDirectory = builder.Configuration["Store:DataDirectory"];
+if (string.IsNullOrWhiteSpace(persistentDataDirectory) &&
+    !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("WEBSITE_INSTANCE_ID")) &&
+    !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("HOME")))
+    persistentDataDirectory = Path.Combine(Environment.GetEnvironmentVariable("HOME")!, "site", "data");
+if (!string.IsNullOrWhiteSpace(persistentDataDirectory))
+{
+    persistentDataDirectory = Path.GetFullPath(persistentDataDirectory);
+    Directory.CreateDirectory(persistentDataDirectory);
+    var configuredConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+    if (string.IsNullOrWhiteSpace(configuredConnection))
+    {
+        configuredConnection = "Data Source=store.db";
+    }
+    var sqlite = new SqliteConnectionStringBuilder(configuredConnection);
+    if (sqlite.DataSource != ":memory:" && !Path.IsPathRooted(sqlite.DataSource))
+    {
+        var databasePath = Path.GetFullPath(Path.Combine(persistentDataDirectory, sqlite.DataSource));
+        var relativeDatabasePath = Path.GetRelativePath(persistentDataDirectory, databasePath);
+        if (relativeDatabasePath == ".." ||
+            relativeDatabasePath.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal) ||
+            Path.IsPathRooted(relativeDatabasePath))
+            throw new InvalidOperationException("The relative SQLite database path must remain within Store:DataDirectory.");
+        sqlite.DataSource = databasePath;
+        Directory.CreateDirectory(Path.GetDirectoryName(sqlite.DataSource)!);
+    }
+    builder.Configuration["ConnectionStrings:DefaultConnection"] = sqlite.ConnectionString;
+    builder.Services.AddDataProtection()
+        .SetApplicationName("Anaya3DPrintStore")
+        .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(persistentDataDirectory, "DataProtection-Keys")));
+}
 
 StripeConfiguration.ApiKey = builder.Configuration["StripeSettings:SecretKey"];
 
@@ -65,6 +99,13 @@ builder.Services.AddSession(options =>
 
 
 var app = builder.Build();
+
+if (builder.Configuration.GetValue<bool>("Store:ApplyMigrationsOnStartup"))
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var db = scope.ServiceProvider.GetRequiredService<ThreeDPrintStore.Data.ApplicationDbContext>();
+    await db.Database.MigrateAsync();
+}
 
 
 /** Seed the SQLite database with products automatically on boot

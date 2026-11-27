@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using ThreeDPrintStore.Services;
 using Xunit;
@@ -52,6 +53,24 @@ public class UploadTests
             store.Delete(name);
             Assert.Null(store.Find(name, false));
             Assert.Empty(Directory.GetFiles(Path.Combine(root, "App_Data", "Uploads")));
+        }
+        finally { Directory.Delete(root, recursive: true); }
+    }
+
+    [Fact]
+    public async Task Private_store_honors_configured_persistent_data_directory()
+    {
+        var root = Path.Combine(AppContext.BaseDirectory, "test-data", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(root);
+        try
+        {
+            var configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string?> { ["Store:DataDirectory"] = root })
+                .Build();
+            var store = new PrivateUploadStore(new TestEnvironment(Path.Combine(root, "content")), configuration);
+            var name = await store.SaveAsync(File("model.stl", "solid test\nfacet normal 0 0 0\nendsolid test"), false, default);
+            Assert.True(System.IO.File.Exists(Path.Combine(root, "Uploads", name)));
+            Assert.NotNull(store.Find(name, false));
         }
         finally { Directory.Delete(root, recursive: true); }
     }

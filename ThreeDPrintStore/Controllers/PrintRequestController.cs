@@ -12,11 +12,13 @@ public class PrintRequestsController : ControllerBase
 {
     private readonly ApplicationDbContext _db;
     private readonly IWebHostEnvironment _environment;
+    private readonly IConfiguration _configuration;
 
-    public PrintRequestsController(ApplicationDbContext db, IWebHostEnvironment environment)
+    public PrintRequestsController(ApplicationDbContext db, IWebHostEnvironment environment, IConfiguration configuration)
     {
         _db = db;
         _environment = environment;
+        _configuration = configuration;
     }
 
     [HttpGet("antiforgery")]
@@ -35,7 +37,7 @@ public class PrintRequestsController : ControllerBase
         if (!ModelState.IsValid) return ValidationProblem(ModelState);
         try
         {
-            var request = await new PrintRequestSubmission(_db, _environment).SaveAsync(input, cancellationToken);
+            var request = await new PrintRequestSubmission(_db, _environment, _configuration).SaveAsync(input, cancellationToken);
             return Ok(new { message = "Print request submitted successfully!", requestId = request.Id });
         }
         catch (InvalidDataException ex)
